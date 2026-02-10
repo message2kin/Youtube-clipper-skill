@@ -71,7 +71,7 @@ def create_vtt(segments: list, output_path: str):
             f.write(f"{text}\n\n")
 
 
-def transcribe_video(video_path: str, model_size: str = "base", output_dir: str = None) -> str:
+def transcribe_video(video_path: str, model_size: str = "base", language: str = None, output_dir: str = None) -> str:
     """
     Transcribe video audio to VTT subtitle
     """
@@ -89,6 +89,10 @@ def transcribe_video(video_path: str, model_size: str = "base", output_dir: str 
     print(f"🎤 Starting transcription...")
     print(f"   Video: {video_path.name}")
     print(f"   Model: {model_size}")
+    if language:
+        print(f"   Language: {language}")
+    else:
+        print(f"   Language: Auto-detect")
     
     # Create temp directory for audio extraction
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -104,7 +108,11 @@ def transcribe_video(video_path: str, model_size: str = "base", output_dir: str 
             
             # 3. Transcribe
             print(f"   Transcribing audio (this may take a while)...")
-            result = model.transcribe(audio_path, verbose=False)
+            options = {"verbose": False}
+            if language:
+                options["language"] = language
+                
+            result = model.transcribe(audio_path, **options)
             
             # 4. Save VTT
             create_vtt(result['segments'], str(vtt_path))
@@ -121,15 +129,17 @@ def transcribe_video(video_path: str, model_size: str = "base", output_dir: str 
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python transcribe_audio.py <video_path> [model_size]")
+        print("Usage: python transcribe_audio.py <video_path> [model_size] [language]")
         print("Models: tiny, base, small, medium, large")
+        print("Language: en, zh, ja, etc. (optional, auto-detect if omitted)")
         sys.exit(1)
         
     video_path = sys.argv[1]
     model_size = sys.argv[2] if len(sys.argv) > 2 else "base"
+    language = sys.argv[3] if len(sys.argv) > 3 else None
     
     try:
-        transcribe_video(video_path, model_size)
+        transcribe_video(video_path, model_size, language)
     except Exception as e:
         sys.exit(1)
 

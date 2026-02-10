@@ -107,14 +107,17 @@ model: claude-sonnet-4-5-20250514
 **如果阶段 2 未找到字幕**:
 
 1. 询问用户是否生成字幕
-   - 提示需要 `openai-whisper`
-   - 生成过程可能较慢
+   - 是否生成？
+   - 偏好的模型大小？(默认 `base`, 可选 `small`, `medium`)
+   - 偏好的语言？(默认自动检测, 可选 `zh`, `en`, `ja`)
+   - 提示：需安装 `openai-whisper`，较大模型生成速度较慢 (medium 可能需要几分钟)
 
 2. 调用 transcribe_audio.py
    ```bash
-   python3 scripts/transcribe_audio.py <video_path> [model_size]
+   python3 scripts/transcribe_audio.py <video_path> [model_size] [language]
    ```
    - model_size: `base` (默认，快), `small`, `medium` (更准但慢)
+   - language: `zh`, `en`, `ja` 等 (可选，指定语言可提高准确率)
 
 3. 输出:
    - 字幕文件: `<video_filename>.vtt`
