@@ -58,17 +58,22 @@ model: claude-sonnet-4-5-20250514
 
 3. 检测 Python 依赖
    ```bash
-   python3 -c "import yt_dlp; print('✅ yt-dlp available')"
-   python3 -c "import pysrt; print('✅ pysrt available')"
+   ./venv/bin/python3 -c "import yt_dlp; print('✅ yt-dlp available')"
+   ./venv/bin/python3 -c "import pysrt; print('✅ pysrt available')"
+   ./venv/bin/python3 -c "import anthropic; print('✅ anthropic available')"
+   ```
+   **注意**: 如果 `anthropic` 未安装（用于章节分析），请运行：
+   ```bash
+   ./venv/bin/pip install anthropic
    ```
 
 **如果环境检测失败**:
-- yt-dlp 未安装: 提示 `brew install yt-dlp` 或 `pip install yt-dlp`
+- yt-dlp 未安装: 运行 `bash install_as_skill.sh` 重新安装
 - FFmpeg 无 libass: 提示安装 ffmpeg-full
   ```bash
   brew install ffmpeg-full  # macOS
   ```
-- Python 依赖缺失: 提示 `pip install pysrt python-dotenv`
+- Python 依赖缺失: 运行 `bash install_as_skill.sh` 重新安装
 
 **注意**:
 - 标准 Homebrew FFmpeg 不包含 libass，无法烧录字幕
@@ -77,11 +82,14 @@ model: claude-sonnet-4-5-20250514
 
 4. 检测 Whisper (可选，用于自动生成字幕)
    ```bash
-   python3 -c "import whisper; print('✅ whisper available')"
+   ./venv/bin/python3 -c "import whisper; print('✅ whisper available')"
+4. 检测 Whisper (可选，用于自动生成字幕)
+   ```bash
+   ./venv/bin/python3 -c "import whisper; print('✅ whisper available')"
    ```
    如果未安装：
    ```bash
-   pip install openai-whisper
+   ./venv/bin/pip install openai-whisper
    ```
 
 ---
@@ -95,7 +103,7 @@ model: claude-sonnet-4-5-20250514
 2. 调用 download_video.py 脚本
    ```bash
    cd ~/.claude/skills/youtube-clipper
-   python3 scripts/download_video.py <youtube_url>
+   ./venv/bin/python3 scripts/download_video.py <youtube_url>
    ```
 
 3. 脚本会：
@@ -127,7 +135,7 @@ model: claude-sonnet-4-5-20250514
 
 2. 调用 transcribe_audio.py
    ```bash
-   python3 scripts/transcribe_audio.py <video_path> [model_size] [language]
+   ./venv/bin/python3 scripts/transcribe_audio.py <video_path> [model_size] [language]
    ```
    - model_size: `base` (默认，快), `small`, `medium` (更准但慢)
    - language: `zh`, `en`, `ja` 等 (可选，指定语言可提高准确率)
@@ -144,10 +152,10 @@ model: claude-sonnet-4-5-20250514
 1. 调用 analyze_subtitles.py 解析 VTT 字幕
    ```bash
    # Standard
-   python3 scripts/analyze_subtitles.py <subtitle_path>
+   ./venv/bin/python3 scripts/analyze_subtitles.py <subtitle_path>
 
-   # Shorts Mode (默认 60s 粒度)
-   python3 scripts/analyze_subtitles.py <subtitle_path> --shorts
+   # Shorts Mode (专用脚本，<60s 粒度)
+   ./venv/bin/python3 scripts/analyze_shorts.py <subtitle_path>
    ```
 
 2. 脚本会输出结构化字幕数据：
@@ -219,7 +227,7 @@ model: claude-sonnet-4-5-20250514
 
 #### 5.1 剪辑视频片段
 ```bash
-python3 scripts/clip_video.py <video_path> <start_time> <end_time> <output_path> [--shorts]
+./venv/bin/python3 scripts/clip_video.py <video_path> <start_time> <end_time> <output_path> [--shorts]
 ```
 - 使用 FFmpeg 精确剪辑
 - **Shorts 模式**: 自动应用 9:16 中心裁剪
@@ -234,7 +242,7 @@ python3 scripts/clip_video.py <video_path> <start_time> <end_time> <output_path>
 
 #### 5.3 翻译字幕（如果用户选择）
 ```bash
-python3 scripts/translate_subtitles.py <subtitle_path>
+./venv/bin/python3 scripts/translate_subtitles.py <subtitle_path>
 ```
 - **批量翻译优化**: 每批 20 条字幕一起翻译（节省 95% API 调用）
 - 翻译策略：
@@ -251,7 +259,7 @@ python3 scripts/translate_subtitles.py <subtitle_path>
 
 #### 5.5 烧录字幕到视频（如果用户选择）
 ```bash
-python3 scripts/burn_subtitles.py <video_path> <subtitle_path> <output_path> [--shorts]
+./venv/bin/python3 scripts/burn_subtitles.py <video_path> <subtitle_path> <output_path> [--shorts]
 ```
 - 使用 ffmpeg-full（libass 支持）
 - **使用临时目录解决路径空格问题**（关键！）
@@ -263,7 +271,7 @@ python3 scripts/burn_subtitles.py <video_path> <subtitle_path> <output_path> [--
 
 #### 5.6 生成总结文案（如果用户选择）
 ```bash
-python3 scripts/generate_summary.py <chapter_info>
+./venv/bin/python3 scripts/generate_summary.py <chapter_info>
 ```
 - 基于章节标题、摘要和关键词
 - 生成适合社交媒体的文案

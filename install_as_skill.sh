@@ -69,8 +69,8 @@ main() {
             print_info "安装已取消"
             exit 0
         fi
-        print_info "删除旧版本..."
-        rm -rf "$SKILL_DIR"
+        print_info "正在更新..."
+        # rm -rf "$SKILL_DIR"
     fi
 
     # 3. 创建目录
@@ -85,23 +85,24 @@ main() {
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
     # 复制所有必要文件
-    cp -r "$SCRIPT_DIR"/* "$SKILL_DIR/"
-
-    # 排除不需要的文件
-    if [ -d "$SKILL_DIR/.git" ]; then
-        rm -rf "$SKILL_DIR/.git"
-    fi
-    if [ -d "$SKILL_DIR/venv" ]; then
-        rm -rf "$SKILL_DIR/venv"
-    fi
-    if [ -d "$SKILL_DIR/__pycache__" ]; then
-        rm -rf "$SKILL_DIR/__pycache__"
-    fi
-    if [ -d "$SKILL_DIR/youtube-clips" ]; then
-        rm -rf "$SKILL_DIR/youtube-clips"
-    fi
-    if [ -f "$SKILL_DIR/.env" ]; then
-        rm "$SKILL_DIR/.env"
+    if command_exists rsync; then
+        rsync -av --exclude 'venv' \
+                  --exclude '.git' \
+                  --exclude '__pycache__' \
+                  --exclude '.DS_Store' \
+                  --exclude '.env' \
+                  --exclude 'youtube-clips' \
+                  "$SCRIPT_DIR/" "$SKILL_DIR/"
+    else
+        # Fallback to cp if rsync is not available (less clean)
+        cp -R "$SCRIPT_DIR"/* "$SKILL_DIR/"
+        
+        # Manually cleanup if using cp
+        if [ -d "$SKILL_DIR/.git" ]; then rm -rf "$SKILL_DIR/.git"; fi
+        if [ -d "$SKILL_DIR/venv" ]; then rm -rf "$SKILL_DIR/venv"; fi
+        if [ -d "$SKILL_DIR/__pycache__" ]; then rm -rf "$SKILL_DIR/__pycache__"; fi
+        if [ -d "$SKILL_DIR/youtube-clips" ]; then rm -rf "$SKILL_DIR/youtube-clips"; fi
+        if [ -f "$SKILL_DIR/.env" ]; then rm "$SKILL_DIR/.env"; fi
     fi
 
     print_success "文件复制完成"
@@ -123,30 +124,35 @@ main() {
     fi
     print_success "pip 已安装"
 
-    # 7. 安装 Python 依赖
-    print_info "安装 Python 依赖..."
+    # 7. 创建虚拟环境并安装依赖
+    print_info "创建 Python 虚拟环境..."
     cd "$SKILL_DIR"
 
-    # 尝试使用 pip3，如果不存在则使用 pip
-    if command_exists pip3; then
-        pip3 install -q yt-dlp pysrt python-dotenv
-    else
-        pip install -q yt-dlp pysrt python-dotenv
+    # 清除旧的 venv
+    if [ -d "venv" ]; then
+        rm -rf venv
     fi
 
-    print_success "Python 依赖安装完成（yt-dlp、pysrt、python-dotenv）"
+    # 创建 venv
+    python3 -m venv venv
+
+    print_info "激活虚拟环境并安装依赖..."
+    # 使用 venv 中的 pip 安装
+    ./venv/bin/pip install -q --no-cache-dir --upgrade pip
+    ./venv/bin/pip install -q --no-cache-dir yt-dlp pysrt python-dotenv
+
+    print_success "Python 依赖安装完成（已安装至 venv）"
 
     # 8. 检查 yt-dlp
     print_info "检查 yt-dlp..."
-    if command_exists yt-dlp; then
+    if [ -f "./venv/bin/yt-dlp" ]; then
+        YT_DLP_VERSION=$(./venv/bin/yt-dlp --version)
+        print_success "yt-dlp 已安装 (venv): $YT_DLP_VERSION"
+    elif command_exists yt-dlp; then
         YT_DLP_VERSION=$(yt-dlp --version)
-        print_success "yt-dlp 已安装: $YT_DLP_VERSION"
+        print_success "yt-dlp 已安装 (系统): $YT_DLP_VERSION"
     else
-        print_warning "yt-dlp 命令行工具未安装"
-        print_info "安装方法:"
-        print_info "  macOS:  brew install yt-dlp"
-        print_info "  Ubuntu: sudo apt-get install yt-dlp"
-        print_info "  或: pip3 install -U yt-dlp"
+        print_warning "yt-dlp 命令行工具未在 PATH 中找到 (但已安装在 venv 中)"
     fi
 
     # 9. 检查 FFmpeg（关键：需要 libass 支持）
