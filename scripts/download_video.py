@@ -110,18 +110,23 @@ def download_video(url: str, output_dir: str = None) -> dict:
 
             # 查找字幕文件
             subtitle_path = None
-            subtitle_exts = ['.en.vtt', '.vtt']
-            for ext in subtitle_exts:
-                potential_sub = video_path.with_suffix(ext)
-                # 处理带语言代码的字幕文件
-                if not potential_sub.exists():
-                    # 尝试 <filename>.en.vtt 格式
-                    stem = video_path.stem
-                    potential_sub = video_path.parent / f"{stem}.en.vtt"
-
+            # 优先查找下载的字幕（按偏好顺序）
+            # yt-dlp 命名格式: <video_path>.<lang>.vtt
+            langs = ['zh-Hant', 'zh-HK', 'yue', 'en']
+            
+            for lang in langs:
+                potential_sub = video_path.with_suffix(f".{lang}.vtt")
                 if potential_sub.exists():
                     subtitle_path = potential_sub
+                    print(f"   找到字幕 ({lang}): {subtitle_path.name}")
                     break
+            
+            # 如果没找到特定语言字幕，尝试通用 vtt
+            if not subtitle_path:
+                potential_sub = video_path.with_suffix(".vtt")
+                if potential_sub.exists():
+                    subtitle_path = potential_sub
+                    print(f"   找到通用字幕: {subtitle_path.name}")
 
             # 获取文件大小
             file_size = video_path.stat().st_size if video_path.exists() else 0
