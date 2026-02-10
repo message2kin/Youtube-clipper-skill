@@ -128,6 +128,13 @@ def download_video(url: str, output_dir: str = None) -> dict:
                     subtitle_path = potential_sub
                     print(f"   找到通用字幕: {subtitle_path.name}")
 
+            # 还没有找到，尝试查找自动生成的字幕 (en)
+            if not subtitle_path:
+                 potential_sub = video_path.with_suffix(".en.vtt")
+                 if potential_sub.exists():
+                     subtitle_path = potential_sub
+                     print(f"   找到自动生成字幕: {subtitle_path.name}")
+
             # 获取文件大小
             file_size = video_path.stat().st_size if video_path.exists() else 0
 

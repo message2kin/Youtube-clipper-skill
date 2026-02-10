@@ -62,6 +62,15 @@ model: claude-sonnet-4-5-20250514
 - ffmpeg-full 路径: `/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg` (Apple Silicon)
 - 必须先通过环境检测才能继续
 
+4. 检测 Whisper (可选，用于自动生成字幕)
+   ```bash
+   python3 -c "import whisper; print('✅ whisper available')"
+   ```
+   如果未安装：
+   ```bash
+   pip install openai-whisper
+   ```
+
 ---
 
 ### 阶段 2: 下载视频
@@ -78,7 +87,7 @@ model: claude-sonnet-4-5-20250514
 
 3. 脚本会：
    - 下载视频（最高 1080p，mp4 格式）
-   - 下载英文字幕（VTT 格式，自动字幕作为备选）
+   - 下载字幕（优先中文/粤语，其次英文，最后自动生成）
    - 输出文件路径和视频信息
 
 4. 向用户展示：
@@ -88,8 +97,27 @@ model: claude-sonnet-4-5-20250514
    - 下载路径
 
 **输出**:
-- 视频文件: `<id>.mp4`（使用视频 ID 命名，避免特殊字符问题）
-- 字幕文件: `<id>.en.vtt`
+- 视频文件: `<id>.mp4`
+- 字幕文件: `<id>.<lang>.vtt` (如 `.zh-Hant.vtt` 或 `.en.vtt`)
+
+### 阶段 2.5: 自动生成字幕 (Fallback)
+
+**目标**: 当无法从 YouTube 下载字幕时，使用 Whisper 本地生成
+
+**如果阶段 2 未找到字幕**:
+
+1. 询问用户是否生成字幕
+   - 提示需要 `openai-whisper`
+   - 生成过程可能较慢
+
+2. 调用 transcribe_audio.py
+   ```bash
+   python3 scripts/transcribe_audio.py <video_path> [model_size]
+   ```
+   - model_size: `base` (默认，快), `small`, `medium` (更准但慢)
+
+3. 输出:
+   - 字幕文件: `<video_filename>.vtt`
 
 ---
 
