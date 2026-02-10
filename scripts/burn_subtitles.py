@@ -126,7 +126,11 @@ def burn_subtitles(
     output_path: str,
     ffmpeg_path: str = None,
     font_size: int = 24,
-    margin_v: int = 30
+    margin_v: int = 30,
+    bold: int = 0,
+    outline: int = 1,
+    shadow: int = 0,
+    color: str = '&HFFFFFF'
 ) -> str:
     """
     烧录字幕到视频（使用临时目录解决路径空格问题）
@@ -136,8 +140,12 @@ def burn_subtitles(
         subtitle_path: 字幕文件路径（SRT 格式）
         output_path: 输出视频路径
         ffmpeg_path: FFmpeg 可执行文件路径（可选）
-        font_size: 字体大小，默认 24
-        margin_v: 底部边距，默认 30
+        font_size: 字体大小
+        margin_v: 底部边距
+        bold: 是否加粗 (0/1)
+        outline: 描边宽度
+        shadow: 阴影深度
+        color: 字体颜色 (ASS hex format, e.g. &H00FFFF for yellow, &HFFFFFF for white)
 
     Returns:
         str: 输出视频路径
@@ -191,8 +199,19 @@ def burn_subtitles(
         shutil.copy(subtitle_path, temp_subtitle)
 
         # 构建 FFmpeg 命令
+        # 构建 FFmpeg 命令
         # 使用 subtitles 滤镜烧录字幕
-        subtitle_filter = f"subtitles={temp_subtitle}:force_style='FontSize={font_size},MarginV={margin_v}'"
+        # force_style uses ASS style format
+        # PrimaryColour is in &HAABBGGRR format (Hex). Yellow in RGB is FFFF00, so in BBGGRR it is 00FFFF.
+        style_opts = [
+            f"FontSize={font_size}",
+            f"MarginV={margin_v}",
+            f"Bold={bold}",
+            f"Outline={outline}",
+            f"Shadow={shadow}",
+            f"PrimaryColour={color}"
+        ]
+        subtitle_filter = f"subtitles={temp_subtitle}:force_style='{','.join(style_opts)}'"
 
         cmd = [
             ffmpeg_path,
@@ -246,32 +265,67 @@ def burn_subtitles(
 
 def main():
     """命令行入口"""
-    if len(sys.argv) < 4:
-        print("Usage: python burn_subtitles.py <video> <subtitle> <output> [font_size] [margin_v]")
+    # Parse args manually
+    args = [arg for arg in sys.argv[1:] if not arg.startswith('--')]
+    
+    if len(args) < 3:
+        print("Usage: python burn_subtitles.py <video> <subtitle> <output> [font_size] [margin_v] [--shorts]")
         print("\nArguments:")
         print("  video      - 输入视频文件路径")
         print("  subtitle   - 字幕文件路径（SRT 格式）")
         print("  output     - 输出视频文件路径")
         print("  font_size  - 字体大小，默认 24")
         print("  margin_v   - 底部边距，默认 30")
+        print("  --shorts   - (可选) 启用 Shorts 模式 (大字体/高位置)")
         print("\nExample:")
         print("  python burn_subtitles.py input.mp4 subtitle.srt output.mp4")
-        print("  python burn_subtitles.py input.mp4 subtitle.srt output.mp4 28 40")
+        print("  python burn_subtitles.py input.mp4 subtitle.srt output.mp4 --shorts")
         sys.exit(1)
 
-    video_path = sys.argv[1]
-    subtitle_path = sys.argv[2]
-    output_path = sys.argv[3]
-    font_size = int(sys.argv[4]) if len(sys.argv) > 4 else 24
-    margin_v = int(sys.argv[5]) if len(sys.argv) > 5 else 30
-
     try:
+        is_shorts = '--shorts' in sys.argv
+        
+        video_path = args[0]
+        subtitle_path = args[1]
+        output_path = args[2]
+        
+        # Default settings
+        font_size = 24
+        margin_v = 30
+        bold = 0
+        outline = 1
+        shadow = 0
+        color = '&HFFFFFF' # White
+        
+        # Override if user provided explicitly
+        if len(args) > 3:
+            font_size = int(args[3])
+        if len(args) > 4:
+            margin_v = int(args[4])
+            
+        # Shorts mode overrides (unless user provided explicit args? No, let's say shorts flag changes defaults)
+        if is_shorts:
+            # If user didn't explicitly provide font_size/margin, use Shorts defaults
+            if len(args) <= 3:
+                font_size = 40  # Larger for shorts
+            if len(args) <= 4:
+                margin_v = 500  # Higher up (center-ish)
+            
+            bold = 1
+            outline = 3
+            shadow = 1
+            color = '&H00FFFF' # Yellow
+
         result_path = burn_subtitles(
             video_path,
             subtitle_path,
             output_path,
             font_size=font_size,
-            margin_v=margin_v
+            margin_v=margin_v,
+            bold=bold,
+            outline=outline,
+            shadow=shadow,
+            color=color
         )
 
         print(f"\n✨ 完成！输出文件: {result_path}")

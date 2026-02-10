@@ -23,7 +23,8 @@ def clip_video(
     start_time: Union[str, float],
     end_time: Union[str, float],
     output_path: str,
-    ffmpeg_path: str = None
+    ffmpeg_path: str = None,
+    is_shorts: bool = False
 ) -> str:
     """
     剪辑视频片段
@@ -34,6 +35,7 @@ def clip_video(
         end_time: 结束时间（秒数或时间字符串）
         output_path: 输出视频路径
         ffmpeg_path: FFmpeg 可执行文件路径（可选）
+        is_shorts: 是否裁剪为 Shorts (9:16)
 
     Returns:
         str: 输出视频路径
@@ -78,26 +80,35 @@ def clip_video(
     print(f"   结束时间: {seconds_to_time(end_seconds)} ({end_seconds}s)")
     print(f"   片段时长: {get_video_duration_display(duration)}")
     print(f"   输出: {output_path.name}")
+    print(f"   模式: {'Shorts (9:16 裁剪)' if is_shorts else '默认 (保持原比例)'}")
 
     # 创建输出目录
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     # 构建 FFmpeg 命令
-    # 构建 FFmpeg 命令
-    # 使用 9:16 中心裁剪
-    crop_filter = "crop=ih*(9/16):ih:(iw-ow)/2:0"
-    
     cmd = [
         ffmpeg_path,
         '-y',                        # 覆盖输出文件
         '-i', str(video_path),       # 输入文件
         '-ss', str(start_seconds),   # 起始时间
         '-t', str(duration),         # 持续时间
-        '-vf', crop_filter,          # 视频滤镜 (9:16 裁剪)
+    ]
+
+    # 视频滤镜
+    filters = []
+    
+    if is_shorts:
+        # 使用 9:16 中心裁剪
+        filters.append("crop=ih*(9/16):ih:(iw-ow)/2:0")
+    
+    if filters:
+        cmd.extend(['-vf', ','.join(filters)])
+
+    cmd.extend([
         '-c:v', 'libx264',           # 视频编码
         '-c:a', 'aac',               # 音频编码
         str(output_path)
-    ]
+    ])
 
     print(f"   执行 FFmpeg...")
 
@@ -207,26 +218,31 @@ def save_subtitles_as_srt(subtitles: list, output_path: str):
 
 def main():
     """命令行入口"""
-    if len(sys.argv) < 5:
-        print("Usage: python clip_video.py <video> <start_time> <end_time> <output>")
+    # Parse args manually to handle flags
+    args = [arg for arg in sys.argv[1:] if not arg.startswith('--')]
+    
+    if len(args) < 4:
+        print("Usage: python clip_video.py <video> <start_time> <end_time> <output> [--shorts]")
         print("\nArguments:")
         print("  video      - 输入视频文件路径")
         print("  start_time - 起始时间（秒数或时间字符串，如 00:01:30）")
         print("  end_time   - 结束时间（秒数或时间字符串）")
         print("  output     - 输出视频文件路径")
+        print("  --shorts   - (可选) 启用 Shorts 模式 (9:16 裁剪)")
         print("\nExample:")
         print("  python clip_video.py input.mp4 0 195 output.mp4")
-        print("  python clip_video.py input.mp4 00:00:00 00:03:15 output.mp4")
-        print("  python clip_video.py input.mp4 01:30:00 01:33:15 output.mp4")
+        print("  python clip_video.py input.mp4 00:00:00 00:03:15 output.mp4 --shorts")
         sys.exit(1)
 
-    video_path = sys.argv[1]
-    start_time = sys.argv[2]
-    end_time = sys.argv[3]
-    output_path = sys.argv[4]
-
     try:
-        result_path = clip_video(video_path, start_time, end_time, output_path)
+        is_shorts = '--shorts' in sys.argv
+        
+        video_path = args[0]
+        start_time = args[1]
+        end_time = args[2]
+        output_path = args[3]
+
+        result_path = clip_video(video_path, start_time, end_time, output_path, is_shorts=is_shorts)
         print(f"\n✨ 完成！输出文件: {result_path}")
 
     except Exception as e:

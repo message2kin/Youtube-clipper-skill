@@ -197,9 +197,20 @@ def main():
         print("  python analyze_subtitles.py video.en.vtt 240 analysis.json")
         sys.exit(1)
 
-    vtt_file = sys.argv[1]
-    target_duration = int(sys.argv[2]) if len(sys.argv) > 2 else 180
-    output_json = sys.argv[3] if len(sys.argv) > 3 else None
+    is_shorts = '--shorts' in sys.argv
+    args = [arg for arg in sys.argv[1:] if not arg.startswith('--')]
+    
+    if len(args) < 1:
+        print("Usage: python analyze_subtitles.py <vtt_file> [target_duration] [output_json] [--shorts]")
+        sys.exit(1)
+
+    vtt_file = args[0]
+    
+    # Determine default duration
+    default_duration = 60 if is_shorts else 180
+    
+    target_duration = int(args[1]) if len(args) > 1 else default_duration
+    output_json = args[2] if len(args) > 2 else None
 
     try:
         # 解析字幕
@@ -235,10 +246,14 @@ def main():
             'total_duration_display': get_video_duration_display(analysis_data['total_duration']),
             'subtitle_count': analysis_data['subtitle_count'],
             'target_chapter_duration': analysis_data['target_chapter_duration'],
-            'estimated_chapters': analysis_data['estimated_chapters']
+            'estimated_chapters': analysis_data['estimated_chapters'],
+            'mode': 'Shorts' if is_shorts else 'Standard'
         }, indent=2, ensure_ascii=False))
 
-        print("\n💡 提示：现在可以使用 Claude AI 分析上述字幕文本，生成精细章节")
+        hint_msg = "💡 提示：现在可以使用 Claude AI 分析上述字幕文本，生成精细章节"
+        if is_shorts:
+            hint_msg += "\n   (Shorts 模式: 请重点寻找富有冲击力、适合短视频传播的 60秒以内片段)"
+        print(f"\n{hint_msg}")
 
     except Exception as e:
         print(f"\n❌ 错误: {str(e)}")

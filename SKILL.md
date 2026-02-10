@@ -22,7 +22,20 @@ model: claude-sonnet-4-5-20250514
 
 你将按照以下 6 个阶段执行 YouTube 视频剪辑任务：
 
-### 阶段 1: 环境检测
+### 阶段 0: 模式选择
+26: 
+27: **目标**: 确认用户想要制作哪种类型的视频
+28: 
+29: 1. 询问用户：
+30:    - **Standard (默认)**: 16:9 横屏，保留完整画面，适合 YouTube 长视频切片。
+31:    - **Shorts**: 9:16 竖屏裁剪，强力字幕样式，<60s 片段，适合 TikTok/Shorts/Reels。
+32: 
+33: **后续步骤差异**:
+34: - 如果选择 **Shorts**: 在后续所有脚本调用中添加 `--shorts` 参数。
+35: 
+36: ---
+37: 
+38: ### 阶段 1: 环境检测
 
 **目标**: 确保所有必需工具和依赖都已安装
 
@@ -130,7 +143,11 @@ model: claude-sonnet-4-5-20250514
 
 1. 调用 analyze_subtitles.py 解析 VTT 字幕
    ```bash
+   # Standard
    python3 scripts/analyze_subtitles.py <subtitle_path>
+
+   # Shorts Mode (默认 60s 粒度)
+   python3 scripts/analyze_subtitles.py <subtitle_path> --shorts
    ```
 
 2. 脚本会输出结构化字幕数据：
@@ -142,7 +159,8 @@ model: claude-sonnet-4-5-20250514
    - 阅读完整字幕内容
    - 理解内容语义和主题转换点
    - 识别自然的话题切换位置
-   - 生成 2-5 分钟粒度的章节（避免半小时粗粒度切分）
+   - 生成 2-5 分钟粒度的章节（Standard 模式）
+   - 生成 < 60秒 的高能片段（Shorts 模式）
 
 4. 为每个章节生成：
    - **标题**: 精炼的主题概括（10-20 字）
@@ -155,6 +173,7 @@ model: claude-sonnet-4-5-20250514
    - 完整性：确保所有视频内容都被覆盖，无遗漏
    - 有意义：每个章节是一个相对独立的话题
    - 自然切分：在主题转换点切分，不要机械地按时间切
+   - **Shorts 特别提示**: 寻找反差、金句、情绪高点，开头前3秒必须吸引人。
 
 6. 向用户展示章节列表：
    ```
@@ -200,9 +219,10 @@ model: claude-sonnet-4-5-20250514
 
 #### 5.1 剪辑视频片段
 ```bash
-python3 scripts/clip_video.py <video_path> <start_time> <end_time> <output_path>
+python3 scripts/clip_video.py <video_path> <start_time> <end_time> <output_path> [--shorts]
 ```
 - 使用 FFmpeg 精确剪辑
+- **Shorts 模式**: 自动应用 9:16 中心裁剪
 - 保持原始视频质量
 - 输出: `<章节标题>_clip.mp4`
 
@@ -231,14 +251,14 @@ python3 scripts/translate_subtitles.py <subtitle_path>
 
 #### 5.5 烧录字幕到视频（如果用户选择）
 ```bash
-python3 scripts/burn_subtitles.py <video_path> <subtitle_path> <output_path>
+python3 scripts/burn_subtitles.py <video_path> <subtitle_path> <output_path> [--shorts]
 ```
 - 使用 ffmpeg-full（libass 支持）
 - **使用临时目录解决路径空格问题**（关键！）
-- 字幕样式：
-  - 字体大小: 24
-  - 底部边距: 30
-  - 颜色: 白色文字 + 黑色描边
+- 字幕样式（Standard）：
+  - 字体大小: 24, 底部边距: 30, 白色
+- 字幕样式（Shorts）：
+  - 字体大小: 40, 底部边距: 500 (避开 UI), 黄色高亮, 粗体
 - 输出: `<章节标题>_with_subtitles.mp4`
 
 #### 5.6 生成总结文案（如果用户选择）
@@ -346,6 +366,11 @@ python3 scripts/generate_summary.py <chapter_info>
 **路径**:
 - 标准: `/opt/homebrew/bin/ffmpeg`
 - ffmpeg-full: `/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg` (Apple Silicon)
+350: 
+351: ### 5. Shorts 模式优化
+352: - **裁剪**: `crop=ih*(9/16):ih:(iw-ow)/2:0` 保持中心主体
+353: - **样式**: 黄色大号字体，大幅度上移，确保在手机小屏上清晰可见且不被 UI 遮挡
+354: - **时长**: 聚焦 < 60s 完播率高的片段
 
 ---
 
