@@ -72,7 +72,7 @@ def download_video(url: str, output_dir: str = None) -> dict:
         # 下载字幕
         'writesubtitles': True,
         'writeautomaticsub': True,  # 自动字幕作为备选
-        'subtitleslangs': ['en'],   # 英文字幕
+        'subtitleslangs': ['zh-Hant', 'zh-HK', 'yue', 'en'],   # 优先繁体中文/广东话
         'subtitlesformat': 'vtt',   # VTT 格式
 
         # 不下载缩略图

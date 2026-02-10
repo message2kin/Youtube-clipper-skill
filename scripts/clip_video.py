@@ -83,15 +83,19 @@ def clip_video(
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     # 构建 FFmpeg 命令
-    # 使用 -ss 和 -t 进行精确剪辑
-    # -c copy: 直接复制流，不重新编码（快速且无损）
+    # 构建 FFmpeg 命令
+    # 使用 9:16 中心裁剪
+    crop_filter = "crop=ih*(9/16):ih:(iw-ow)/2:0"
+    
     cmd = [
         ffmpeg_path,
-        '-ss', str(start_seconds),  # 起始时间
-        '-i', str(video_path),       # 输入文件
-        '-t', str(duration),         # 持续时间
-        '-c', 'copy',                # 直接复制，不重新编码
         '-y',                        # 覆盖输出文件
+        '-i', str(video_path),       # 输入文件
+        '-ss', str(start_seconds),   # 起始时间
+        '-t', str(duration),         # 持续时间
+        '-vf', crop_filter,          # 视频滤镜 (9:16 裁剪)
+        '-c:v', 'libx264',           # 视频编码
+        '-c:a', 'aac',               # 音频编码
         str(output_path)
     ]
 
