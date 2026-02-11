@@ -35,7 +35,8 @@ model: claude-sonnet-4-5-20250514
 - 如果选择 **Shorts**: 在后续所有脚本调用中添加 `--shorts` 参数。
 - 如果选择 **Analysis Only**: 
   - 下载阶段使用 `--subs-only`
-  - 并行执行 analyze_subtitles.py 和 analyze_shorts.py
+  - 运行 `analyze_subtitles.py --analysis-only`
+  - 生成包含 Standard 章节和 Viral Shorts 的综合分析报告
   - 跳过剪辑和烧录阶段
   - 直接输出文本报告
 
@@ -165,8 +166,9 @@ model: claude-sonnet-4-5-20250514
    ./venv/bin/python3 scripts/analyze_shorts.py <subtitle_path>
 
    # Analysis Only Mode
-   # 依次运行 analyze_subtitles.py (生成章节) 和 analyze_shorts.py (生成 Shorts 创意)
-   # 请确保章节输出格式为: MM:SS <章节标题>
+   # 运行 analyze_subtitles.py 并添加 --analysis-only 参数
+   ./venv/bin/python3 scripts/analyze_subtitles.py <subtitle_path> --analysis-only
+   # 输出将提示生成 Standard 章节和 Viral Shorts
    ```
 
 2. 脚本会输出结构化字幕数据：

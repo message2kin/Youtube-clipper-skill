@@ -198,10 +198,11 @@ def main():
         sys.exit(1)
 
     is_shorts = '--shorts' in sys.argv
+    is_analysis_only = '--analysis-only' in sys.argv
     args = [arg for arg in sys.argv[1:] if not arg.startswith('--')]
     
     if len(args) < 1:
-        print("Usage: python analyze_subtitles.py <vtt_file> [target_duration] [output_json] [--shorts]")
+        print("Usage: python analyze_subtitles.py <vtt_file> [target_duration] [output_json] [--shorts] [--analysis-only]")
         sys.exit(1)
 
     vtt_file = args[0]
@@ -247,18 +248,28 @@ def main():
             'subtitle_count': analysis_data['subtitle_count'],
             'target_chapter_duration': analysis_data['target_chapter_duration'],
             'estimated_chapters': analysis_data['estimated_chapters'],
-            'mode': 'Shorts' if is_shorts else 'Standard'
+            'mode': 'Analysis Only' if is_analysis_only else ('Shorts' if is_shorts else 'Standard')
         }, indent=2, ensure_ascii=False))
 
         hint_msg = "💡 提示：现在可以使用 Claude AI 分析上述字幕文本，生成精细章节"
-        if not is_shorts:
-            hint_msg += "\n   请按以下格式输出章节（Analysis Only 模式）:\n"
+        if is_analysis_only:
+            hint_msg += "\n   请按以下格式输出分析结果（包含 Standard 章节和 Viral Shorts）:\n"
+            hint_msg += "   ## 章节 (Standard)\n"
+            hint_msg += "   MM:SS <章节标题>\n"
+            hint_msg += "   - 摘要: ...\n"
+            hint_msg += "   - 关键词: ...\n\n"
+            hint_msg += "   ## 病毒短片 (Viral Shorts)\n"
+            hint_msg += "   - 时间范围: MM:SS - MM:SS\n"
+            hint_msg += "   - 钩子 (Hook): [评分 1-10] 为什么这个片段吸引人\n"
+            hint_msg += "   - 适合平台: TikTok/Shorts/Reels\n"
+        elif not is_shorts:
+            hint_msg += "\n   请按以下格式输出章节（Standard 模式）:\n"
             hint_msg += "   MM:SS <章节标题>\n"
             hint_msg += "   例如:\n"
             hint_msg += "   00:00 黎智英20年重判與香港三條路\n"
             hint_msg += "   03:25 黎智英作為反抗象徵與歷史對比"
         
-        if is_shorts:
+        if is_shorts and not is_analysis_only:
             hint_msg += "\n   (Shorts 模式: 请重点寻找富有冲击力、适合短视频传播的 60秒以内片段)"
         print(f"\n{hint_msg}")
 
