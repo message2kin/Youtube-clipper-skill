@@ -24,13 +24,14 @@ from utils import (
 )
 
 
-def download_video(url: str, output_dir: str = None) -> dict:
+def download_video(url: str, output_dir: str = None, subs_only: bool = False) -> dict:
     """
     下载 YouTube 视频和字幕
 
     Args:
         url: YouTube URL
         output_dir: 输出目录，默认为当前目录
+        subs_only: 是否仅下载字幕（如果失败会自动回退到下载视频）
 
     Returns:
         dict: {
@@ -86,6 +87,51 @@ def download_video(url: str, output_dir: str = None) -> dict:
         'progress_hooks': [_progress_hook],
     }
 
+    # 如果是 subs_only 模式，先检查字幕是否存在
+    should_skip_download = False
+    if subs_only:
+        print("\n🔍 检查字幕可用性...")
+        check_opts = {
+            'list_subtitles': True,
+            'quiet': True,
+            'no_warnings': True
+        }
+        try:
+            with yt_dlp.YoutubeDL(check_opts) as ydl:
+                info = ydl.extract_info(url, download=False)
+                # 检查是否有我们要的字幕
+                has_subs = False
+                requested_langs = ['zh-Hant', 'zh-HK', 'yue', 'en']
+                
+                # Check manual subtitles
+                if 'subtitles' in info and info['subtitles']:
+                    for lang in requested_langs:
+                        if lang in info['subtitles']:
+                            has_subs = True
+                            print(f"   ✅ 找到人工字幕: {lang}")
+                            break
+                            
+                # Check auto subtitles if no manual ones found
+                if not has_subs and 'automatic_captions' in info and info['automatic_captions']:
+                     # Auto captions usually have 'en', 'en-orig', etc.
+                     # We'll accept 'en' from auto captions
+                     for lang in ['en', 'zh-Hant', 'zh-HK', 'yue']:
+                         if lang in info['automatic_captions']:
+                             has_subs = True
+                             print(f"   ✅ 找到自动字幕: {lang}")
+                             break
+                
+                if has_subs:
+                    print("   ✨ 字幕可用，跳过视频下载")
+                    ydl_opts['skip_download'] = True
+                    should_skip_download = True
+                else:
+                    print("   ⚠️ 未找到有效字幕，将下载视频用于后续转录")
+                    # 不设置 skip_download，继续下载视频
+        except Exception as e:
+             print(f"   ⚠️ 检查字幕失败: {e}，将尝试常规下载")
+
+
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             # 提取信息
@@ -139,11 +185,14 @@ def download_video(url: str, output_dir: str = None) -> dict:
             file_size = video_path.stat().st_size if video_path.exists() else 0
 
             # 验证下载结果
-            if not video_path.exists():
+            if not should_skip_download and not video_path.exists():
                 raise Exception("Video file not found after download")
 
-            print(f"\n✅ 视频下载完成: {video_path.name}")
-            print(f"   大小: {format_file_size(file_size)}")
+            if not should_skip_download:
+                print(f"\n✅ 视频下载完成: {video_path.name}")
+                print(f"   大小: {format_file_size(file_size)}")
+            else:
+                print(f"\n✅ 视频下载已跳过 (仅下载字幕)")
 
             if subtitle_path and subtitle_path.exists():
                 print(f"✅ 字幕下载完成: {subtitle_path.name}")
@@ -152,7 +201,7 @@ def download_video(url: str, output_dir: str = None) -> dict:
                 print(f"   提示：某些视频可能没有字幕或需要自动生成")
 
             return {
-                'video_path': str(video_path),
+                'video_path': str(video_path) if video_path.exists() else "",
                 'subtitle_path': str(subtitle_path) if subtitle_path else None,
                 'title': title,
                 'duration': duration,
@@ -196,17 +245,27 @@ def _progress_hook(d):
 def main():
     """命令行入口"""
     if len(sys.argv) < 2:
-        print("Usage: python download_video.py <youtube_url> [output_dir]")
+        print("Usage: python download_video.py <youtube_url> [output_dir] [--subs-only]")
         print("\nExample:")
         print("  python download_video.py https://youtube.com/watch?v=Ckt1cj0xjRM")
         print("  python download_video.py https://youtube.com/watch?v=Ckt1cj0xjRM ~/Downloads")
+        print("  python download_video.py https://youtube.com/watch?v=Ckt1cj0xjRM ~/Downloads --subs-only")
         sys.exit(1)
 
     url = sys.argv[1]
-    output_dir = sys.argv[2] if len(sys.argv) > 2 else None
+    
+    # Parse args manually
+    output_dir = None
+    subs_only = False
+    
+    for arg in sys.argv[2:]:
+        if arg == '--subs-only':
+            subs_only = True
+        elif not arg.startswith('--'):
+            output_dir = arg
 
     try:
-        result = download_video(url, output_dir)
+        result = download_video(url, output_dir, subs_only)
 
         # 输出 JSON 结果（供其他脚本使用）
         print("\n" + "="*60)

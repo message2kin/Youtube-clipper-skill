@@ -23,19 +23,25 @@ model: claude-sonnet-4-5-20250514
 你将按照以下 6 个阶段执行 YouTube 视频剪辑任务：
 
 ### 阶段 0: 模式选择
-26: 
-27: **目标**: 确认用户想要制作哪种类型的视频
-28: 
-29: 1. 询问用户：
-30:    - **Standard (默认)**: 16:9 横屏，保留完整画面，适合 YouTube 长视频切片。
-31:    - **Shorts**: 9:16 竖屏裁剪，强力字幕样式，<60s 片段，适合 TikTok/Shorts/Reels。
-32: 
-33: **后续步骤差异**:
-34: - 如果选择 **Shorts**: 在后续所有脚本调用中添加 `--shorts` 参数。
-35: 
-36: ---
-37: 
-38: ### 阶段 1: 环境检测
+
+**目标**: 确认用户想要制作哪种类型的视频
+
+1. 询问用户：
+   - **Standard (默认)**: 16:9 横屏，保留完整画面，适合 YouTube 长视频切片。
+   - **Shorts**: 9:16 竖屏裁剪，强力字幕样式，<60s 片段，适合 TikTok/Shorts/Reels。
+   - **Analysis Only**: 仅分析视频，生成章节和 Shorts 创意，不进行剪辑处理。适合作为 YouTube 视频优化的辅助工具。
+
+**后续步骤差异**:
+- 如果选择 **Shorts**: 在后续所有脚本调用中添加 `--shorts` 参数。
+- 如果选择 **Analysis Only**: 
+  - 下载阶段使用 `--subs-only`
+  - 并行执行 analyze_subtitles.py 和 analyze_shorts.py
+  - 跳过剪辑和烧录阶段
+  - 直接输出文本报告
+
+---
+
+### 阶段 1: 环境检测
 
 **目标**: 确保所有必需工具和依赖都已安装
 
@@ -103,8 +109,9 @@ model: claude-sonnet-4-5-20250514
 2. 调用 download_video.py 脚本
    ```bash
    cd ~/.claude/skills/youtube-clipper
-   ./venv/bin/python3 scripts/download_video.py <youtube_url>
+   ./venv/bin/python3 scripts/download_video.py <youtube_url> [--subs-only]
    ```
+   - **Analysis Only 模式**: 添加 `--subs-only` 参数。如果视频有字幕，将跳过视频下载；如果无字幕，会自动下载视频以进行后续转录。
 
 3. 脚本会：
    - 下载视频（最高 1080p，mp4 格式）
@@ -156,6 +163,9 @@ model: claude-sonnet-4-5-20250514
 
    # Shorts Mode (专用脚本，<60s 粒度)
    ./venv/bin/python3 scripts/analyze_shorts.py <subtitle_path>
+
+   # Analysis Only Mode
+   # 依次运行 analyze_subtitles.py (生成章节) 和 analyze_shorts.py (生成 Shorts 创意)
    ```
 
 2. 脚本会输出结构化字幕数据：
@@ -216,12 +226,15 @@ model: claude-sonnet-4-5-20250514
    - 是否生成总结文案？
 
 3. 确认用户选择并展示处理计划
+   - **Analysis Only 模式**: 跳过此阶段，直接输出所有分析结果。
 
 ---
 
 ### 阶段 5: 剪辑处理（核心执行阶段）
 
 **目标**: 并行执行多个处理任务
+
+**目标**: 并行执行多个处理任务（Analysis Only 模式跳过此阶段）
 
 对于每个用户选择的章节，执行以下步骤：
 
