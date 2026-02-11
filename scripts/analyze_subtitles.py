@@ -252,25 +252,45 @@ def main():
         }, indent=2, ensure_ascii=False))
 
         hint_msg = "💡 提示：现在可以使用 Claude AI 分析上述字幕文本，生成精细章节"
+        shorts_criteria_msg = "   ## 病毒短片 (Viral Shorts) 要求:\n"
+        shorts_criteria_msg += "   1. 时长: 15-60秒 (严格限制)\n"
+        shorts_criteria_msg += "   2. 钩子 (Hook): 开头 3 秒必须有视觉/听觉冲击或悬念\n"
+        shorts_criteria_msg += "   3. 结构: 结尾有反转、金句或适合循环播放 (Loop)\n"
+        shorts_criteria_msg += "   4. 优先: 情绪饱满、快节奏、信息密度高的片段\n"
+
+        # 1. Header
         if is_analysis_only:
             hint_msg += "\n   请按以下格式输出分析结果（包含 Standard 章节和 Viral Shorts）:\n"
-            hint_msg += "   ## 章节 (Standard)\n"
-            hint_msg += "   MM:SS <章节标题>\n"
-            hint_msg += "   - 摘要: ...\n"
-            hint_msg += "   - 关键词: ...\n\n"
-            hint_msg += "   ## 病毒短片 (Viral Shorts)\n"
-            hint_msg += "   - 时间范围: MM:SS - MM:SS\n"
-            hint_msg += "   - 钩子 (Hook): [评分 1-10] 为什么这个片段吸引人\n"
-            hint_msg += "   - 适合平台: TikTok/Shorts/Reels\n"
-        elif not is_shorts:
+        elif is_shorts:
+            hint_msg += "\n   (Shorts 模式)\n"
+        else:
             hint_msg += "\n   请按以下格式输出章节（Standard 模式）:\n"
-            hint_msg += "   MM:SS <章节标题>\n"
-            hint_msg += "   例如:\n"
-            hint_msg += "   00:00 黎智英20年重判與香港三條路\n"
-            hint_msg += "   03:25 黎智英作為反抗象徵與歷史對比"
-        
-        if is_shorts and not is_analysis_only:
-            hint_msg += "\n   (Shorts 模式: 请重点寻找富有冲击力、适合短视频传播的 60秒以内片段)"
+
+        # 2. Standard Section
+        if is_analysis_only or not is_shorts:
+            if is_analysis_only:
+                hint_msg += "   ## 章节 (Standard)\n"
+                hint_msg += "   MM:SS <章节标题>\n"
+                hint_msg += "   - 摘要: ...\n"
+                hint_msg += "   - 关键词: ...\n\n"
+            else:
+                hint_msg += "   MM:SS <章节标题>\n"
+                hint_msg += "   例如:\n"
+                hint_msg += "   00:00 黎智英20年重判與香港三條路\n"
+                hint_msg += "   03:25 黎智英作為反抗象徵與歷史對比"
+
+        # 3. Shorts Section
+        if is_analysis_only or is_shorts:
+            if is_analysis_only:
+                hint_msg += f"{shorts_criteria_msg}\n"
+                hint_msg += "   请按以下格式输出 Shorts:\n"
+                hint_msg += "   - 时间范围: MM:SS - MM:SS\n"
+                hint_msg += "   - 评分: [1-10] (病毒传播潜力)\n"
+                hint_msg += "   - 钩子 (Hook): ...\n"
+                hint_msg += "   - 理由: 为什么适合 TikTok/Shorts\n"
+            else:
+                hint_msg += f"{shorts_criteria_msg}"
+                hint_msg += "\n   请输出符合上述要求的高能片段列表。"
         print(f"\n{hint_msg}")
 
     except Exception as e:
