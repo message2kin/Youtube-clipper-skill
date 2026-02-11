@@ -166,6 +166,7 @@ model: claude-sonnet-4-5-20250514
 
    # Analysis Only Mode
    # 依次运行 analyze_subtitles.py (生成章节) 和 analyze_shorts.py (生成 Shorts 创意)
+   # 请确保章节输出格式为: MM:SS <章节标题>
    ```
 
 2. 脚本会输出结构化字幕数据：
@@ -226,7 +227,7 @@ model: claude-sonnet-4-5-20250514
    - 是否生成总结文案？
 
 3. 确认用户选择并展示处理计划
-   - **Analysis Only 模式**: 跳过此阶段，直接输出所有分析结果。
+   - **Analysis Only 模式**: 跳过此阶段，直接输出所有分析结果(格式: MM:SS <章节标题>)。
 
 ---
 

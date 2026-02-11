@@ -251,6 +251,13 @@ def main():
         }, indent=2, ensure_ascii=False))
 
         hint_msg = "💡 提示：现在可以使用 Claude AI 分析上述字幕文本，生成精细章节"
+        if not is_shorts:
+            hint_msg += "\n   请按以下格式输出章节（Analysis Only 模式）:\n"
+            hint_msg += "   MM:SS <章节标题>\n"
+            hint_msg += "   例如:\n"
+            hint_msg += "   00:00 黎智英20年重判與香港三條路\n"
+            hint_msg += "   03:25 黎智英作為反抗象徵與歷史對比"
+        
         if is_shorts:
             hint_msg += "\n   (Shorts 模式: 请重点寻找富有冲击力、适合短视频传播的 60秒以内片段)"
         print(f"\n{hint_msg}")
