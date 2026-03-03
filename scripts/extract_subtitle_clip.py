@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-提取字幕片段并转换为 SRT 格式
+提取字幕片段並轉換為 SRT 格式
 """
 
 import sys
@@ -8,7 +8,7 @@ import re
 from datetime import timedelta
 
 def parse_vtt_time(time_str):
-    """解析 VTT 时间格式为秒"""
+    """解析 VTT 時間格式為秒"""
     parts = time_str.strip().split(':')
     if len(parts) == 3:
         hours = int(parts[0])
@@ -22,7 +22,7 @@ def parse_vtt_time(time_str):
     return 0
 
 def format_srt_time(seconds):
-    """格式化为 SRT 时间格式"""
+    """格式化為 SRT 時間格式"""
     td = timedelta(seconds=seconds)
     hours = int(td.total_seconds() // 3600)
     minutes = int((td.total_seconds() % 3600) // 60)
@@ -32,16 +32,16 @@ def format_srt_time(seconds):
 
 def extract_subtitle_clip(vtt_file, start_time, end_time, output_file):
     """提取字幕片段"""
-    # 解析时间
+    # 解析時間
     start_seconds = parse_vtt_time(start_time)
     end_seconds = parse_vtt_time(end_time)
 
     print(f"📝 提取字幕片段...")
-    print(f"   输入: {vtt_file}")
-    print(f"   时间范围: {start_time} - {end_time}")
-    print(f"   时间范围（秒）: {start_seconds:.1f}s - {end_seconds:.1f}s")
+    print(f"   輸入: {vtt_file}")
+    print(f"   時間範圍: {start_time} - {end_time}")
+    print(f"   時間範圍（秒）: {start_seconds:.1f}s - {end_seconds:.1f}s")
 
-    # 读取 VTT 文件
+    # 讀取 VTT 文件
     with open(vtt_file, 'r', encoding='utf-8') as f:
         lines = f.readlines()
 
@@ -51,9 +51,9 @@ def extract_subtitle_clip(vtt_file, start_time, end_time, output_file):
     while i < len(lines):
         line = lines[i].strip()
 
-        # 查找时间戳行
+        # 查找時間戳行
         if '-->' in line:
-            # 解析时间戳
+            # 解析時間戳
             time_parts = line.split('-->')
             sub_start_str = time_parts[0].strip().split()[0]
             sub_end_str = time_parts[1].strip().split()[0]
@@ -61,7 +61,7 @@ def extract_subtitle_clip(vtt_file, start_time, end_time, output_file):
             sub_start = parse_vtt_time(sub_start_str)
             sub_end = parse_vtt_time(sub_end_str)
 
-            # 检查是否在目标时间范围内
+            # 檢查是否在目標時間範圍內
             if sub_start >= start_seconds and sub_end <= end_seconds:
                 # 收集字幕文本
                 i += 1
@@ -72,7 +72,7 @@ def extract_subtitle_clip(vtt_file, start_time, end_time, output_file):
 
                 text = ' '.join(text_lines)
 
-                # 调整时间戳（减去起始时间）
+                # 調整時間戳（減去起始時間）
                 adjusted_start = sub_start - start_seconds
                 adjusted_end = sub_end - start_seconds
 
@@ -84,9 +84,9 @@ def extract_subtitle_clip(vtt_file, start_time, end_time, output_file):
 
         i += 1
 
-    print(f"   找到 {len(subtitles)} 条字幕")
+    print(f"   找到 {len(subtitles)} 條字幕")
 
-    # 写入 SRT 格式
+    # 寫入 SRT 格式
     with open(output_file, 'w', encoding='utf-8') as f:
         for idx, sub in enumerate(subtitles, 1):
             f.write(f"{idx}\n")
@@ -95,8 +95,8 @@ def extract_subtitle_clip(vtt_file, start_time, end_time, output_file):
             f.write("\n")
 
     print(f"✅ 字幕提取完成")
-    print(f"   输出文件: {output_file}")
-    print(f"   字幕条数: {len(subtitles)}")
+    print(f"   輸出文件: {output_file}")
+    print(f"   字幕條數: {len(subtitles)}")
 
     return subtitles
 

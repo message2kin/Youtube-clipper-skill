@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
-English | [简体中文](README.zh-CN.md)
+English | [簡體中文](README.zh-CN.md)
 
 [Features](#features) • [Installation](#installation) • [Usage](#usage) • [Requirements](#requirements) • [Configuration](#configuration) • [Troubleshooting](#troubleshooting)
 
@@ -40,6 +40,7 @@ bash install_as_skill.sh
 ```
 
 The install script will:
+
 - Copy files to `~/.claude/skills/youtube-clipper/`
 - Install Python dependencies (yt-dlp, pysrt, python-dotenv)
 - Check system dependencies (Python, yt-dlp, FFmpeg)
@@ -51,15 +52,16 @@ The install script will:
 
 ### System Dependencies
 
-| Dependency | Version | Purpose | Installation |
-|------------|---------|---------|--------------|
-| **Python** | 3.8+ | Script execution | [python.org](https://www.python.org/downloads/) |
-| **yt-dlp** | Latest | YouTube download | `brew install yt-dlp` (macOS)<br>`sudo apt install yt-dlp` (Ubuntu)<br>`pip install yt-dlp` (pip) |
-| **FFmpeg with libass** | Latest | Video processing & subtitle burning | `brew install ffmpeg-full` (macOS)<br>`sudo apt install ffmpeg libass-dev` (Ubuntu) |
+| Dependency             | Version | Purpose                             | Installation                                                                                      |
+| ---------------------- | ------- | ----------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **Python**             | 3.8+    | Script execution                    | [python.org](https://www.python.org/downloads/)                                                   |
+| **yt-dlp**             | Latest  | YouTube download                    | `brew install yt-dlp` (macOS)<br>`sudo apt install yt-dlp` (Ubuntu)<br>`pip install yt-dlp` (pip) |
+| **FFmpeg with libass** | Latest  | Video processing & subtitle burning | `brew install ffmpeg-full` (macOS)<br>`sudo apt install ffmpeg libass-dev` (Ubuntu)               |
 
 ### Python Packages
 
 These are automatically installed by the install script:
+
 - `yt-dlp` - YouTube downloader
 - `pysrt` - SRT subtitle parser
 - `python-dotenv` - Environment variable management
@@ -77,6 +79,7 @@ brew install ffmpeg-full
 ```
 
 **Verify libass support**:
+
 ```bash
 ffmpeg -filters 2>&1 | grep subtitles
 # Should output: subtitles    V->V  (...)
@@ -97,7 +100,7 @@ Clip this YouTube video: https://youtube.com/watch?v=VIDEO_ID
 or
 
 ```
-剪辑这个 YouTube 视频：https://youtube.com/watch?v=VIDEO_ID
+剪輯這個 YouTube 影片：https://youtube.com/watch?v=VIDEO_ID
 ```
 
 ### Workflow
@@ -159,11 +162,13 @@ For full configuration options, see [.env.example](.env.example).
 ### Example 1: Extract highlights from a tech interview
 
 **Input**:
+
 ```
 Clip this video: https://youtube.com/watch?v=Ckt1cj0xjRM
 ```
 
 **Output** (AI-generated chapters):
+
 ```
 1. [00:00 - 03:15] AGI as an exponential curve, not a point in time
 2. [03:15 - 06:30] China's gap in AI development
@@ -176,11 +181,13 @@ Clip this video: https://youtube.com/watch?v=Ckt1cj0xjRM
 ### Example 2: Create short clips from a course
 
 **Input**:
+
 ```
 Clip this lecture video and create bilingual subtitles: https://youtube.com/watch?v=LECTURE_ID
 ```
 
 **Options**:
+
 - Generate bilingual subtitles: Yes
 - Burn subtitles into video: Yes
 - Generate summary: Yes
@@ -194,12 +201,14 @@ Clip this lecture video and create bilingual subtitles: https://youtube.com/watc
 ### AI Semantic Chapter Analysis
 
 Unlike mechanical time-based splitting, this skill uses Claude's AI to:
+
 - Understand content semantics
 - Identify natural topic transitions
 - Generate meaningful chapter titles and summaries
 - Ensure complete coverage with no gaps
 
 **Example**:
+
 ```
 ❌ Mechanical splitting: [0:00-30:00], [30:00-60:00]
 ✅ AI semantic analysis:
@@ -211,6 +220,7 @@ Unlike mechanical time-based splitting, this skill uses Claude's AI to:
 ### Batch Translation Optimization
 
 Translates 20 subtitles at once instead of one-by-one:
+
 - 95% reduction in API calls
 - 10x faster translation
 - Better translation consistency
@@ -223,7 +233,7 @@ Generated subtitle files contain both English and Chinese:
 1
 00:00:00,000 --> 00:00:03,500
 This is the English subtitle
-这是中文字幕
+這是中文字幕
 
 2
 00:00:03,500 --> 00:00:07,000
@@ -240,6 +250,7 @@ Another English line
 **Error**: `Option not found: subtitles` or `filter not found`
 
 **Solution**: Install `ffmpeg-full` (macOS) or ensure `libass-dev` is installed (Ubuntu):
+
 ```bash
 # macOS
 brew uninstall ffmpeg
@@ -252,6 +263,7 @@ sudo apt install ffmpeg libass-dev
 ### Video download is slow
 
 **Solution**: Set a proxy in `.env`:
+
 ```bash
 YT_DLP_PROXY=http://proxy-server:port
 # or
@@ -263,6 +275,7 @@ YT_DLP_PROXY=socks5://proxy-server:port
 **Cause**: API rate limiting or network issues
 
 **Solution**: The skill automatically retries up to 3 times. If persistent, check:
+
 - Network connectivity
 - Claude API status
 - Reduce `TRANSLATION_BATCH_SIZE` in `.env`
@@ -272,6 +285,7 @@ YT_DLP_PROXY=socks5://proxy-server:port
 **Issue**: Filenames with `:`, `/`, `?`, etc. may cause errors
 
 **Solution**: The skill automatically sanitizes filenames by:
+
 - Removing special characters: `/ \ : * ? " < > |`
 - Replacing spaces with underscores
 - Limiting length to 100 characters
@@ -290,6 +304,7 @@ YT_DLP_PROXY=socks5://proxy-server:port
 ## Contributing
 
 Contributions are welcome! Please:
+
 - Report bugs via [GitHub Issues](https://github.com/op7418/Youtube-clipper-skill/issues)
 - Submit feature requests
 - Open pull requests for improvements

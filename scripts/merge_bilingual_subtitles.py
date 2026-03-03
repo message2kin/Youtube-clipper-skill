@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-合并英文和中文字幕为双语 SRT 文件
+合併英文和中文字幕為雙語 SRT 文件
 """
 
 import sys
@@ -11,7 +11,7 @@ def parse_srt_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # 分割字幕块
+    # 分割字幕塊
     blocks = content.strip().split('\n\n')
     subtitles = []
 
@@ -30,19 +30,19 @@ def parse_srt_file(file_path):
     return subtitles
 
 def merge_bilingual_subtitles(english_file, chinese_file, output_file):
-    """合并英文和中文字幕"""
-    print(f"📝 合并双语字幕...")
+    """合併英文和中文字幕"""
+    print(f"📝 合併雙語字幕...")
     print(f"   英文字幕: {english_file}")
     print(f"   中文字幕: {chinese_file}")
 
-    # 解析两个字幕文件
+    # 解析兩個字幕文件
     english_subs = parse_srt_file(english_file)
     chinese_subs = parse_srt_file(chinese_file)
 
     if len(english_subs) != len(chinese_subs):
-        print(f"⚠️  警告: 英文字幕 ({len(english_subs)} 条) 和中文字幕 ({len(chinese_subs)} 条) 数量不匹配")
+        print(f"⚠️  警告: 英文字幕 ({len(english_subs)} 條) 和中文字幕 ({len(chinese_subs)} 條) 數量不匹配")
 
-    # 合并字幕
+    # 合併字幕
     bilingual_subs = []
     for i in range(min(len(english_subs), len(chinese_subs))):
         bilingual_subs.append({
@@ -51,7 +51,7 @@ def merge_bilingual_subtitles(english_file, chinese_file, output_file):
             'text': f"{english_subs[i]['text']}\n{chinese_subs[i]['text']}"
         })
 
-    # 写入双语字幕文件
+    # 寫入雙語字幕文件
     with open(output_file, 'w', encoding='utf-8') as f:
         for sub in bilingual_subs:
             f.write(f"{sub['index']}\n")
@@ -59,9 +59,9 @@ def merge_bilingual_subtitles(english_file, chinese_file, output_file):
             f.write(f"{sub['text']}\n")
             f.write("\n")
 
-    print(f"✅ 双语字幕生成完成")
-    print(f"   输出文件: {output_file}")
-    print(f"   字幕条数: {len(bilingual_subs)}")
+    print(f"✅ 雙語字幕生成完成")
+    print(f"   輸出文件: {output_file}")
+    print(f"   字幕條數: {len(bilingual_subs)}")
 
 if __name__ == '__main__':
     if len(sys.argv) != 4:

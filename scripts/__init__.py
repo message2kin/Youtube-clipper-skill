@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-YouTube 视频智能剪辑工具 - Scripts 包
+YouTube 影片智能剪輯工具 - Scripts 包
 """
 
 __version__ = "1.0.0"

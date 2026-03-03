@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-生成总结文案
-基于章节信息生成适合社交媒体的文案
+生成總結文案
+基於章節信息生成適合社交媒體的文案
 """
 
 import sys
@@ -15,28 +15,28 @@ def generate_summary(
     output_path: str = None
 ) -> str:
     """
-    生成总结文案
+    生成總結文案
 
-    注意：此函数需要在 Claude Code Skill 环境中调用
-    Claude 会自动处理文案生成逻辑
+    注意：此函數需要在 Claude Code Skill 環境中調用
+    Claude 會自動處理文案生成邏輯
 
     Args:
-        chapter_info: 章节信息，包含：
-            - title: 章节标题
-            - time_range: 时间范围
+        chapter_info: 章節信息，包含：
+            - title: 章節標題
+            - time_range: 時間範圍
             - summary: 核心摘要
-            - keywords: 关键词列表
-        output_path: 输出文件路径（可选）
+            - keywords: 關鍵詞列表
+        output_path: 輸出文件路徑（可選）
 
     Returns:
         str: 生成的文案
     """
-    print(f"\n📝 生成总结文案...")
-    print(f"   章节: {chapter_info.get('title', 'Unknown')}")
+    print(f"\n📝 生成總結文案...")
+    print(f"   章節: {chapter_info.get('title', 'Unknown')}")
 
-    # 输出章节信息（供 Claude 分析）
+    # 輸出章節信息（供 Claude 分析）
     print("\n" + "="*60)
-    print("章节信息（JSON 格式）:")
+    print("章節信息（JSON 格式）:")
     print("="*60)
     print(json.dumps(chapter_info, indent=2, ensure_ascii=False))
 
@@ -44,58 +44,58 @@ def generate_summary(
     print("文案生成要求:")
     print("="*60)
     print("""
-请基于上述章节信息生成适合社交媒体的文案。
+請基於上述章節信息生成適合社交媒體的文案。
 
 文案要求：
-1. 吸引人的标题（10-20字）
-2. 核心观点（3-5个要点，每个1-2句话）
-3. 适合平台：
-   - 小红书：口语化，有emoji，1000字以内
-   - 抖音：精炼，突出金句，300字以内
-   - 微信公众号：详细，结构清晰，不限字数
+1. 吸引人的標題（10-20字）
+2. 核心觀點（3-5個要點，每個1-2句話）
+3. 適合平台：
+   - 小紅書：口語化，有emoji，1000字以內
+   - 抖音：精煉，突出金句，300字以內
+   - 微信公眾號：詳細，結構清晰，不限字數
 
-输出格式（Markdown）：
+輸出格式（Markdown）：
 
-# [标题]
+# [標題]
 
-## 核心观点
+## 核心觀點
 
-1. 观点1
-2. 观点2
-3. 观点3
+1. 觀點1
+2. 觀點2
+3. 觀點3
 
-## 适合平台
+## 適合平台
 
-### 小红书版本（1000字）
-[文案内容]
+### 小紅書版本（1000字）
+[文案內容]
 
 ### 抖音版本（300字）
-[文案内容]
+[文案內容]
 
-### 微信公众号版本
-[文案内容]
+### 微信公眾號版本
+[文案內容]
 
-## 标签
+## 標籤
 
-#标签1 #标签2 #标签3
+#標籤1 #標籤2 #標籤3
 """)
 
-    # 生成基础文案（占位符）
-    summary_template = f"""# {chapter_info.get('title', '未命名章节')}
+    # 生成基礎文案（佔位符）
+    summary_template = f"""# {chapter_info.get('title', '未命名章節')}
 
-## 章节信息
+## 章節信息
 
-- 时间范围: {chapter_info.get('time_range', 'N/A')}
+- 時間範圍: {chapter_info.get('time_range', 'N/A')}
 - 核心摘要: {chapter_info.get('summary', 'N/A')}
-- 关键词: {', '.join(chapter_info.get('keywords', []))}
+- 關鍵詞: {', '.join(chapter_info.get('keywords', []))}
 
-## 核心观点
+## 核心觀點
 
-[待生成 - Claude 会在 Skill 执行时自动填充]
+[待生成 - Claude 會在 Skill 執行時自動填充]
 
-## 适合平台
+## 適合平台
 
-### 小红书版本
+### 小紅書版本
 
 [待生成]
 
@@ -103,17 +103,17 @@ def generate_summary(
 
 [待生成]
 
-### 微信公众号版本
+### 微信公眾號版本
 
 [待生成]
 
-## 标签
+## 標籤
 
 {' '.join(['#' + kw for kw in chapter_info.get('keywords', [])])}
 
 ---
 
-生成时间: {chapter_info.get('generated_at', 'N/A')}
+生成時間: {chapter_info.get('generated_at', 'N/A')}
 """
 
     # 保存到文件（如果指定）
@@ -131,19 +131,19 @@ def generate_summary(
 
 def load_chapter_info(json_path: str) -> Dict:
     """
-    从 JSON 文件加载章节信息
+    從 JSON 文件加載章節信息
 
     Args:
-        json_path: JSON 文件路径
+        json_path: JSON 文件路徑
 
     Returns:
-        Dict: 章节信息
+        Dict: 章節信息
     """
     json_path = Path(json_path)
     if not json_path.exists():
         raise FileNotFoundError(f"JSON file not found: {json_path}")
 
-    print(f"📂 加载章节信息: {json_path.name}")
+    print(f"📂 加載章節信息: {json_path.name}")
 
     with open(json_path, 'r', encoding='utf-8') as f:
         chapter_info = json.load(f)
@@ -158,16 +158,16 @@ def create_chapter_info(
     keywords: list
 ) -> Dict:
     """
-    创建章节信息字典
+    創建章節信息字典
 
     Args:
-        title: 章节标题
-        time_range: 时间范围（如 "00:00 - 03:15"）
+        title: 章節標題
+        time_range: 時間範圍（如 "00:00 - 03:15"）
         summary: 核心摘要
-        keywords: 关键词列表
+        keywords: 關鍵詞列表
 
     Returns:
-        Dict: 章节信息
+        Dict: 章節信息
     """
     from datetime import datetime
 
@@ -186,25 +186,25 @@ def main():
         print("Usage: python generate_summary.py <chapter_info_json> [output_file]")
         print("   or: python generate_summary.py --create <title> <time_range> <summary> <keywords> [output_file]")
         print("\nArguments:")
-        print("  chapter_info_json - 章节信息 JSON 文件路径")
-        print("  output_file       - 输出文件路径（可选，默认为 summary.md）")
+        print("  chapter_info_json - 章節信息 JSON 文件路徑")
+        print("  output_file       - 輸出文件路徑（可選，默認為 summary.md）")
         print("\nCreate mode arguments:")
-        print("  --create    - 创建模式")
-        print("  title       - 章节标题")
-        print("  time_range  - 时间范围（如 '00:00 - 03:15'）")
+        print("  --create    - 創建模式")
+        print("  title       - 章節標題")
+        print("  time_range  - 時間範圍（如 '00:00 - 03:15'）")
         print("  summary     - 核心摘要")
-        print("  keywords    - 关键词（逗号分隔）")
+        print("  keywords    - 關鍵詞（逗號分隔）")
         print("\nExample:")
         print("  python generate_summary.py chapter.json")
         print("  python generate_summary.py chapter.json summary.md")
-        print("  python generate_summary.py --create 'AGI指数曲线' '00:00-03:15' '核心摘要' 'AGI,指数增长,Claude' summary.md")
+        print("  python generate_summary.py --create 'AGI指數曲線' '00:00-03:15' '核心摘要' 'AGI,指數增長,Claude' summary.md")
         sys.exit(1)
 
     try:
         if sys.argv[1] == '--create':
-            # 创建模式
+            # 創建模式
             if len(sys.argv) < 6:
-                print("❌ 创建模式需要提供: title, time_range, summary, keywords")
+                print("❌ 創建模式需要提供: title, time_range, summary, keywords")
                 sys.exit(1)
 
             title = sys.argv[2]
@@ -226,16 +226,16 @@ def main():
         summary = generate_summary(chapter_info, output_file)
 
         print("\n" + "="*60)
-        print("生成的文案预览:")
+        print("生成的文案預覽:")
         print("="*60)
         print(summary)
 
-        print("\n⚠️  提示：此脚本需要在 Claude Code Skill 中运行")
-        print("   Claude 会自动生成详细的文案内容")
-        print("   当前仅输出模板")
+        print("\n⚠️  提示：此腳本需要在 Claude Code Skill 中運行")
+        print("   Claude 會自動生成詳細的文案內容")
+        print("   當前僅輸出模板")
 
     except Exception as e:
-        print(f"\n❌ 错误: {str(e)}")
+        print(f"\n❌ 錯誤: {str(e)}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

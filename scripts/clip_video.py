@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-剪辑视频片段
-使用 FFmpeg 精确剪辑视频，保持原始质量
+剪輯影片片段
+使用 FFmpeg 精確剪輯影片，保持原始質量
 """
 
 import sys
@@ -27,31 +27,31 @@ def clip_video(
     is_shorts: bool = False
 ) -> str:
     """
-    剪辑视频片段
+    剪輯影片片段
 
     Args:
-        video_path: 输入视频路径
-        start_time: 起始时间（秒数或时间字符串，如 "00:01:30"）
-        end_time: 结束时间（秒数或时间字符串）
-        output_path: 输出视频路径
-        ffmpeg_path: FFmpeg 可执行文件路径（可选）
-        is_shorts: 是否裁剪为 Shorts (9:16)
+        video_path: 輸入影片路徑
+        start_time: 起始時間（秒數或時間字符串，如 "00:01:30"）
+        end_time: 結束時間（秒數或時間字符串）
+        output_path: 輸出影片路徑
+        ffmpeg_path: FFmpeg 可執行文件路徑（可選）
+        is_shorts: 是否裁剪為 Shorts (9:16)
 
     Returns:
-        str: 输出视频路径
+        str: 輸出影片路徑
 
     Raises:
-        FileNotFoundError: 输入文件不存在
-        RuntimeError: FFmpeg 执行失败
+        FileNotFoundError: 輸入文件不存在
+        RuntimeError: FFmpeg 執行失敗
     """
     video_path = Path(video_path)
     output_path = Path(output_path)
 
-    # 验证输入文件
+    # 驗證輸入文件
     if not video_path.exists():
         raise FileNotFoundError(f"Video file not found: {video_path}")
 
-    # 转换时间为秒数
+    # 轉換時間為秒數
     if isinstance(start_time, str):
         start_seconds = time_to_seconds(start_time)
     else:
@@ -62,39 +62,39 @@ def clip_video(
     else:
         end_seconds = float(end_time)
 
-    # 验证时间范围
+    # 驗證時間範圍
     if start_seconds >= end_seconds:
         raise ValueError(f"Start time ({start_seconds}s) must be before end time ({end_seconds}s)")
 
     duration = end_seconds - start_seconds
 
-    # 检测 FFmpeg
+    # 檢測 FFmpeg
     if ffmpeg_path is None:
         ffmpeg_path = shutil.which('ffmpeg')
         if not ffmpeg_path:
             raise RuntimeError("FFmpeg not found. Please install FFmpeg.")
 
-    print(f"\n✂️  剪辑视频片段...")
-    print(f"   输入: {video_path.name}")
-    print(f"   起始时间: {seconds_to_time(start_seconds)} ({start_seconds}s)")
-    print(f"   结束时间: {seconds_to_time(end_seconds)} ({end_seconds}s)")
-    print(f"   片段时长: {get_video_duration_display(duration)}")
-    print(f"   输出: {output_path.name}")
-    print(f"   模式: {'Shorts (9:16 裁剪)' if is_shorts else '默认 (保持原比例)'}")
+    print(f"\n✂️  剪輯影片片段...")
+    print(f"   輸入: {video_path.name}")
+    print(f"   起始時間: {seconds_to_time(start_seconds)} ({start_seconds}s)")
+    print(f"   結束時間: {seconds_to_time(end_seconds)} ({end_seconds}s)")
+    print(f"   片段時長: {get_video_duration_display(duration)}")
+    print(f"   輸出: {output_path.name}")
+    print(f"   模式: {'Shorts (9:16 裁剪)' if is_shorts else '默認 (保持原比例)'}")
 
-    # 创建输出目录
+    # 創建輸出目錄
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # 构建 FFmpeg 命令
+    # 構建 FFmpeg 命令
     cmd = [
         ffmpeg_path,
-        '-y',                        # 覆盖输出文件
-        '-i', str(video_path),       # 输入文件
-        '-ss', str(start_seconds),   # 起始时间
-        '-t', str(duration),         # 持续时间
+        '-y',                        # 覆蓋輸出文件
+        '-i', str(video_path),       # 輸入文件
+        '-ss', str(start_seconds),   # 起始時間
+        '-t', str(duration),         # 持續時間
     ]
 
-    # 视频滤镜
+    # 影片濾鏡
     filters = []
     
     if is_shorts:
@@ -105,14 +105,14 @@ def clip_video(
         cmd.extend(['-vf', ','.join(filters)])
 
     cmd.extend([
-        '-c:v', 'libx264',           # 视频编码
-        '-c:a', 'aac',               # 音频编码
+        '-c:v', 'libx264',           # 影片編碼
+        '-c:a', 'aac',               # 音頻編碼
         str(output_path)
     ])
 
-    print(f"   执行 FFmpeg...")
+    print(f"   執行 FFmpeg...")
 
-    # 执行 FFmpeg
+    # 執行 FFmpeg
     result = subprocess.run(
         cmd,
         capture_output=True,
@@ -120,18 +120,18 @@ def clip_video(
     )
 
     if result.returncode != 0:
-        print(f"\n❌ FFmpeg 执行失败:")
+        print(f"\n❌ FFmpeg 執行失敗:")
         print(result.stderr)
         raise RuntimeError(f"FFmpeg failed with return code {result.returncode}")
 
-    # 验证输出文件
+    # 驗證輸出文件
     if not output_path.exists():
         raise RuntimeError("Output file not created")
 
-    # 获取文件大小
+    # 獲取文件大小
     output_size = output_path.stat().st_size
-    print(f"✅ 剪辑完成")
-    print(f"   输出文件: {output_path}")
+    print(f"✅ 剪輯完成")
+    print(f"   輸出文件: {output_path}")
     print(f"   文件大小: {format_file_size(output_size)}")
 
     return str(output_path)
@@ -144,13 +144,13 @@ def extract_subtitle_segment(
     adjust_timestamps: bool = True
 ) -> list:
     """
-    从完整字幕中提取指定时间段的字幕
+    從完整字幕中提取指定時間段的字幕
 
     Args:
-        subtitles: 完整字幕列表（每项包含 {start, end, text}）
-        start_time: 起始时间（秒）
-        end_time: 结束时间（秒）
-        adjust_timestamps: 是否调整时间戳（减去起始时间）
+        subtitles: 完整字幕列表（每項包含 {start, end, text}）
+        start_time: 起始時間（秒）
+        end_time: 結束時間（秒）
+        adjust_timestamps: 是否調整時間戳（減去起始時間）
 
     Returns:
         list: 提取的字幕列表
@@ -158,10 +158,10 @@ def extract_subtitle_segment(
     segment_subtitles = []
 
     for sub in subtitles:
-        # 字幕在时间范围内
+        # 字幕在時間範圍內
         if sub['start'] >= start_time and sub['end'] <= end_time:
             if adjust_timestamps:
-                # 调整时间戳（相对于片段起始时间）
+                # 調整時間戳（相對於片段起始時間）
                 adjusted_sub = {
                     'start': sub['start'] - start_time,
                     'end': sub['end'] - start_time,
@@ -171,7 +171,7 @@ def extract_subtitle_segment(
             else:
                 segment_subtitles.append(sub.copy())
 
-        # 字幕跨越时间范围边界（部分重叠）
+        # 字幕跨越時間範圍邊界（部分重疊）
         elif sub['start'] < end_time and sub['end'] > start_time:
             if adjust_timestamps:
                 adjusted_sub = {
@@ -188,21 +188,21 @@ def extract_subtitle_segment(
 
 def save_subtitles_as_srt(subtitles: list, output_path: str):
     """
-    保存字幕为 SRT 格式
+    保存字幕為 SRT 格式
 
     Args:
         subtitles: 字幕列表
-        output_path: 输出文件路径
+        output_path: 輸出文件路徑
     """
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     with open(output_path, 'w', encoding='utf-8') as f:
         for i, sub in enumerate(subtitles, 1):
-            # SRT 序号
+            # SRT 序號
             f.write(f"{i}\n")
 
-            # SRT 时间戳（使用逗号分隔毫秒）
+            # SRT 時間戳（使用逗號分隔毫秒）
             start_time = seconds_to_time(sub['start'], include_hours=True, use_comma=True)
             end_time = seconds_to_time(sub['end'], include_hours=True, use_comma=True)
             f.write(f"{start_time} --> {end_time}\n")
@@ -224,11 +224,11 @@ def main():
     if len(args) < 4:
         print("Usage: python clip_video.py <video> <start_time> <end_time> <output> [--shorts]")
         print("\nArguments:")
-        print("  video      - 输入视频文件路径")
-        print("  start_time - 起始时间（秒数或时间字符串，如 00:01:30）")
-        print("  end_time   - 结束时间（秒数或时间字符串）")
-        print("  output     - 输出视频文件路径")
-        print("  --shorts   - (可选) 启用 Shorts 模式 (9:16 裁剪)")
+        print("  video      - 輸入影片文件路徑")
+        print("  start_time - 起始時間（秒數或時間字符串，如 00:01:30）")
+        print("  end_time   - 結束時間（秒數或時間字符串）")
+        print("  output     - 輸出影片文件路徑")
+        print("  --shorts   - (可選) 啓用 Shorts 模式 (9:16 裁剪)")
         print("\nExample:")
         print("  python clip_video.py input.mp4 0 195 output.mp4")
         print("  python clip_video.py input.mp4 00:00:00 00:03:15 output.mp4 --shorts")
@@ -243,10 +243,10 @@ def main():
         output_path = args[3]
 
         result_path = clip_video(video_path, start_time, end_time, output_path, is_shorts=is_shorts)
-        print(f"\n✨ 完成！输出文件: {result_path}")
+        print(f"\n✨ 完成！輸出文件: {result_path}")
 
     except Exception as e:
-        print(f"\n❌ 错误: {str(e)}")
+        print(f"\n❌ 錯誤: {str(e)}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

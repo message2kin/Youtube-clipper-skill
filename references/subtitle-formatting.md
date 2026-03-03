@@ -1,12 +1,12 @@
-# 字幕格式规范
+# 字幕格式規範
 
-本文档介绍 YouTube Clipper 中使用的字幕格式及其转换方法。
+本文檔介紹 YouTube Clipper 中使用的字幕格式及其轉換方法。
 
 ## 支持的格式
 
 ### 1. VTT (WebVTT)
 
-WebVTT 是 Web 视频字幕标准格式。
+WebVTT 是 Web 影片字幕標準格式。
 
 #### 格式示例
 
@@ -22,11 +22,12 @@ This is the first subtitle
 This is the second subtitle
 ```
 
-#### 特点
-- 头部必须是 `WEBVTT`
-- 时间戳使用点 (`.`) 分隔毫秒
-- 支持样式和位置信息
-- YouTube 默认字幕格式
+#### 特點
+
+- 頭部必須是 `WEBVTT`
+- 時間戳使用點 (`.`) 分隔毫秒
+- 支持樣式和位置信息
+- YouTube 默認字幕格式
 
 #### 完整示例
 
@@ -69,10 +70,11 @@ This is the first subtitle
 This is the second subtitle
 ```
 
-#### 特点
-- 没有头部
-- 时间戳使用逗号 (`,`) 分隔毫秒
-- 不支持样式（但 FFmpeg 可以覆盖）
+#### 特點
+
+- 沒有頭部
+- 時間戳使用逗號 (`,`) 分隔毫秒
+- 不支持樣式（但 FFmpeg 可以覆蓋）
 - 兼容性最好
 
 #### 多行文本
@@ -91,39 +93,39 @@ Single line subtitle
 
 ---
 
-## VTT 与 SRT 对比
+## VTT 與 SRT 對比
 
-| 特性 | VTT | SRT |
-|------|-----|-----|
-| 头部 | 必须（`WEBVTT`） | 无 |
-| 毫秒分隔符 | 点 (`.`) | 逗号 (`,`) |
-| 样式支持 | 是 | 否 |
-| 位置控制 | 是 | 否 |
-| 注释支持 | 是 | 否 |
-| 兼容性 | Web | 通用 |
+| 特性       | VTT              | SRT        |
+| ---------- | ---------------- | ---------- |
+| 頭部       | 必須（`WEBVTT`） | 無         |
+| 毫秒分隔符 | 點 (`.`)         | 逗號 (`,`) |
+| 樣式支持   | 是               | 否         |
+| 位置控制   | 是               | 否         |
+| 註釋支持   | 是               | 否         |
+| 兼容性     | Web              | 通用       |
 
 ---
 
-## 格式转换
+## 格式轉換
 
 ### VTT → SRT
 
-#### Python 实现
+#### Python 實現
 
 ```python
 import re
 
 def vtt_to_srt(vtt_content):
-    # 1. 移除 WEBVTT 头部
+    # 1. 移除 WEBVTT 頭部
     srt_content = re.sub(r'^WEBVTT.*?\n\n', '', vtt_content, flags=re.DOTALL)
 
-    # 2. 移除样式信息
+    # 2. 移除樣式信息
     srt_content = re.sub(r'STYLE.*?\n\n', '', srt_content, flags=re.DOTALL)
 
     # 3. 移除 NOTE
     srt_content = re.sub(r'NOTE.*?\n\n', '', srt_content, flags=re.DOTALL)
 
-    # 4. 转换时间戳分隔符: . → ,
+    # 4. 轉換時間戳分隔符: . → ,
     srt_content = re.sub(
         r'(\d{2}:\d{2}:\d{2})\.(\d{3})',
         r'\1,\2',
@@ -137,7 +139,7 @@ def vtt_to_srt(vtt_content):
         srt_content
     )
 
-    # 6. 移除说话人标签 <v Speaker>
+    # 6. 移除説話人標籤 <v Speaker>
     srt_content = re.sub(r'<v [^>]+>', '', srt_content)
     srt_content = re.sub(r'</v>', '', srt_content)
 
@@ -151,19 +153,19 @@ def vtt_to_srt(vtt_content):
 ffmpeg -i input.vtt output.srt
 
 # 使用 sed
-sed 's/\./,/3' input.vtt > output.srt  # 简单转换（不完整）
+sed 's/\./,/3' input.vtt > output.srt  # 簡單轉換（不完整）
 ```
 
 ### SRT → VTT
 
-#### Python 实现
+#### Python 實現
 
 ```python
 def srt_to_vtt(srt_content):
-    # 1. 添加 WEBVTT 头部
+    # 1. 添加 WEBVTT 頭部
     vtt_content = "WEBVTT\n\n" + srt_content
 
-    # 2. 转换时间戳分隔符: , → .
+    # 2. 轉換時間戳分隔符: , → .
     vtt_content = re.sub(
         r'(\d{2}:\d{2}:\d{2}),(\d{3})',
         r'\1.\2',
@@ -175,17 +177,17 @@ def srt_to_vtt(srt_content):
 
 ---
 
-## 双语字幕
+## 雙語字幕
 
 ### SRT 格式
 
-双语字幕在 SRT 中使用多行文本：
+雙語字幕在 SRT 中使用多行文本：
 
 ```srt
 1
 00:00:00,000 --> 00:00:03,500
 This is English subtitle
-这是中文字幕
+這是中文字幕
 
 2
 00:00:03,500 --> 00:00:07,000
@@ -193,9 +195,9 @@ Another English line
 另一行中文
 ```
 
-### 样式建议
+### 樣式建議
 
-烧录到视频时的样式：
+燒錄到影片時的樣式：
 
 ```bash
 ffmpeg -i video.mp4 \
@@ -203,14 +205,15 @@ ffmpeg -i video.mp4 \
   output.mp4
 ```
 
-推荐参数：
-- `FontSize=24`: 适合 1080p 视频
-- `MarginV=30`: 底部边距 30 像素
+推薦參數：
+
+- `FontSize=24`: 適合 1080p 影片
+- `MarginV=30`: 底部邊距 30 像素
 - 英文在上，中文在下
 
 ---
 
-## 时间戳格式
+## 時間戳格式
 
 ### 完整格式
 
@@ -218,8 +221,8 @@ ffmpeg -i video.mp4 \
 HH:MM:SS.mmm --> HH:MM:SS.mmm
 ```
 
-- `HH`: 小时（00-99）
-- `MM`: 分钟（00-59）
+- `HH`: 小時（00-99）
+- `MM`: 分鐘（00-59）
 - `SS`: 秒（00-59）
 - `mmm`: 毫秒（000-999）
 
@@ -229,22 +232,22 @@ HH:MM:SS.mmm --> HH:MM:SS.mmm
 00:00:00.000  # 0 秒
 00:00:03.500  # 3.5 秒
 00:01:30.250  # 1 分 30.25 秒
-01:23:45.678  # 1 小时 23 分 45.678 秒
+01:23:45.678  # 1 小時 23 分 45.678 秒
 ```
 
-### 注意事项
+### 注意事項
 
-1. 小时部分是可选的，但为了兼容性，建议总是包含
-2. VTT 使用点 (`.`)，SRT 使用逗号 (`,`)
-3. 毫秒必须是 3 位数（不足补 0）
+1. 小時部分是可選的，但為了兼容性，建議總是包含
+2. VTT 使用點 (`.`)，SRT 使用逗號 (`,`)
+3. 毫秒必須是 3 位數（不足補 0）
 
 ---
 
-## 时间调整
+## 時間調整
 
-### 场景：视频剪辑后调整字幕
+### 場景：影片剪輯後調整字幕
 
-剪辑视频 02:00-02:10 后，字幕时间戳需要调整：
+剪輯影片 02:00-02:10 後，字幕時間戳需要調整：
 
 #### 原始字幕
 
@@ -258,7 +261,7 @@ First subtitle
 Second subtitle
 ```
 
-#### 调整后字幕
+#### 調整後字幕
 
 ```srt
 1
@@ -270,19 +273,19 @@ First subtitle
 Second subtitle
 ```
 
-#### Python 实现
+#### Python 實現
 
 ```python
 def adjust_subtitle_time(subtitles, offset_seconds):
     """
-    调整字幕时间戳
+    調整字幕時間戳
 
     Args:
         subtitles: 字幕列表
-        offset_seconds: 偏移量（秒），即剪辑起始时间
+        offset_seconds: 偏移量（秒），即剪輯起始時間
 
     Returns:
-        调整后的字幕列表
+        調整後的字幕列表
     """
     adjusted = []
 
@@ -293,7 +296,7 @@ def adjust_subtitle_time(subtitles, offset_seconds):
             'text': sub['text']
         }
 
-        # 仅保留在有效范围内的字幕
+        # 僅保留在有效範圍內的字幕
         if adjusted_sub['end'] > 0:
             adjusted.append(adjusted_sub)
 
@@ -302,20 +305,20 @@ def adjust_subtitle_time(subtitles, offset_seconds):
 
 ---
 
-## 字幕编码
+## 字幕編碼
 
-### 推荐编码
+### 推薦編碼
 
-**UTF-8**（无 BOM）
+**UTF-8**（無 BOM）
 
-### 检查编码
+### 檢查編碼
 
 ```bash
 file -i subtitle.srt
-# 输出: subtitle.srt: text/plain; charset=utf-8
+# 輸出: subtitle.srt: text/plain; charset=utf-8
 ```
 
-### 转换编码
+### 轉換編碼
 
 ```bash
 # GBK → UTF-8
@@ -327,17 +330,17 @@ sed -i '1s/^\xEF\xBB\xBF//' subtitle.srt
 
 ---
 
-## 字幕验证
+## 字幕驗證
 
-### 检查项目
+### 檢查項目
 
-1. **时间戳格式**: 是否符合规范
-2. **时间顺序**: 起始时间 < 结束时间
-3. **重叠检测**: 相邻字幕是否重叠
-4. **编码检查**: 是否 UTF-8
-5. **空行检查**: 字幕间是否有空行分隔
+1. **時間戳格式**: 是否符合規範
+2. **時間順序**: 起始時間 < 結束時間
+3. **重疊檢測**: 相鄰字幕是否重疊
+4. **編碼檢查**: 是否 UTF-8
+5. **空行檢查**: 字幕間是否有空行分隔
 
-### Python 验证脚本
+### Python 驗證腳本
 
 ```python
 def validate_srt(srt_path):
@@ -346,7 +349,7 @@ def validate_srt(srt_path):
     with open(srt_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # 分割字幕块
+    # 分割字幕塊
     blocks = content.strip().split('\n\n')
 
     prev_end_time = 0
@@ -358,7 +361,7 @@ def validate_srt(srt_path):
             errors.append(f"Block {i+1}: Invalid format (< 3 lines)")
             continue
 
-        # 检查序号
+        # 檢查序號
         try:
             seq = int(lines[0])
             if seq != i + 1:
@@ -366,7 +369,7 @@ def validate_srt(srt_path):
         except ValueError:
             errors.append(f"Block {i+1}: Invalid sequence number")
 
-        # 检查时间戳
+        # 檢查時間戳
         timestamp_pattern = r'(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})'
         match = re.match(timestamp_pattern, lines[1])
 
@@ -378,7 +381,7 @@ def validate_srt(srt_path):
         start_time = time_to_seconds(start_str)
         end_time = time_to_seconds(end_str)
 
-        # 检查时间逻辑
+        # 檢查時間邏輯
         if start_time >= end_time:
             errors.append(f"Block {i+1}: Start time >= End time")
 
@@ -392,39 +395,42 @@ def validate_srt(srt_path):
 
 ---
 
-## 常见问题
+## 常見問題
 
-### Q: FFmpeg 无法读取字幕，提示编码错误
+### Q: FFmpeg 無法讀取字幕，提示編碼錯誤
 
-A: 确保字幕是 UTF-8 编码，且没有 BOM：
+A: 確保字幕是 UTF-8 編碼，且沒有 BOM：
+
 ```bash
 iconv -f GBK -t UTF-8 input.srt > output.srt
 sed -i '1s/^\xEF\xBB\xBF//' output.srt
 ```
 
-### Q: 字幕显示乱码
+### Q: 字幕顯示亂碼
 
-A: 检查编码：
+A: 檢查編碼：
+
 ```bash
 file -i subtitle.srt
-# 如果不是 UTF-8，转换编码
+# 如果不是 UTF-8，轉換編碼
 ```
 
-### Q: VTT 字幕在某些播放器无法显示
+### Q: VTT 字幕在某些播放器無法顯示
 
-A: 尝试转换为 SRT 格式，兼容性更好。
+A: 嘗試轉換為 SRT 格式，兼容性更好。
 
-### Q: 双语字幕中文字太挤
+### Q: 雙語字幕中文字太擠
 
-A: 增加字体大小和边距：
+A: 增加字體大小和邊距：
+
 ```bash
 subtitles=sub.srt:force_style='FontSize=28,MarginV=40'
 ```
 
 ---
 
-## 参考链接
+## 參考鏈接
 
-- [WebVTT 规范](https://www.w3.org/TR/webvtt1/)
-- [SRT 格式说明](https://en.wikipedia.org/wiki/SubRip)
-- [FFmpeg Subtitles 滤镜](https://ffmpeg.org/ffmpeg-filters.html#subtitles)
+- [WebVTT 規範](https://www.w3.org/TR/webvtt1/)
+- [SRT 格式説明](https://en.wikipedia.org/wiki/SubRip)
+- [FFmpeg Subtitles 濾鏡](https://ffmpeg.org/ffmpeg-filters.html#subtitles)

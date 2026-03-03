@@ -1,15 +1,17 @@
 # yt-dlp 使用指南
 
-yt-dlp 是一个强大的 YouTube 视频下载工具，本文档介绍在 YouTube Clipper 中使用的核心功能。
+yt-dlp 是一個強大的 YouTube 影片下載工具，本文檔介紹在 YouTube Clipper 中使用的核心功能。
 
-## 安装
+## 安裝
 
 ### macOS
+
 ```bash
 brew install yt-dlp
 ```
 
 ### Linux
+
 ```bash
 # Ubuntu/Debian
 sudo apt-get install yt-dlp
@@ -19,6 +21,7 @@ pip install yt-dlp
 ```
 
 ### 更新
+
 ```bash
 # Homebrew
 brew upgrade yt-dlp
@@ -29,10 +32,10 @@ pip install --upgrade yt-dlp
 
 ## 基本用法
 
-### 下载视频
+### 下載影片
 
 ```bash
-# 下载最佳质量
+# 下載最佳質量
 yt-dlp https://youtube.com/watch?v=VIDEO_ID
 
 # 指定格式
@@ -42,16 +45,16 @@ yt-dlp -f "best[ext=mp4]" URL
 yt-dlp -f "bestvideo[height<=1080]+bestaudio" URL
 ```
 
-### 下载字幕
+### 下載字幕
 
 ```bash
-# 下载英文字幕
+# 下載英文字幕
 yt-dlp --write-sub --sub-lang en URL
 
-# 下载自动生成字幕（如果没有人工字幕）
+# 下載自動生成字幕（如果沒有人工字幕）
 yt-dlp --write-auto-sub --sub-lang en URL
 
-# 下载所有可用字幕
+# 下載所有可用字幕
 yt-dlp --write-sub --all-subs URL
 
 # 指定字幕格式（VTT, SRT, 等）
@@ -64,70 +67,70 @@ yt-dlp --write-sub --sub-format vtt URL
 
 ```python
 ydl_opts = {
-    # 视频格式：最高 1080p，优先 mp4
+    # 影片格式：最高 1080p，優先 mp4
     'format': 'bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080][ext=mp4]/best',
 
-    # 输出模板
+    # 輸出模板
     'outtmpl': '%(title)s [%(id)s].%(ext)s',
 
-    # 下载字幕
+    # 下載字幕
     'writesubtitles': True,
-    'writeautomaticsub': True,  # 自动字幕作为备选
+    'writeautomaticsub': True,  # 自動字幕作為備選
     'subtitleslangs': ['en'],   # 英文字幕
     'subtitlesformat': 'vtt',   # VTT 格式
 
-    # 不下载缩略图
+    # 不下載縮略圖
     'writethumbnail': False,
 }
 ```
 
-### 格式字符串解释
+### 格式字符串解釋
 
 ```
 bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080][ext=mp4]/best
 │         │              │        │         │       │                           │
-│         │              │        │         │       │                           └─ 最终备选
-│         │              │        │         │       └─ 备选：最佳 1080p mp4
-│         │              │        │         └─ 最佳音频（m4a）
-│         │              │        └─ 合并
-│         │              └─ 优先 mp4 格式
+│         │              │        │         │       │                           └─ 最終備選
+│         │              │        │         │       └─ 備選：最佳 1080p mp4
+│         │              │        │         └─ 最佳音頻（m4a）
+│         │              │        └─ 合併
+│         │              └─ 優先 mp4 格式
 │         └─ 最高 1080p
-└─ 最佳视频质量
+└─ 最佳影片質量
 ```
 
-### 为什么限制 1080p？
+### 為什麼限制 1080p？
 
-1. **文件大小**: 4K 视频可能 5-10GB
-2. **处理速度**: FFmpeg 处理时间长
-3. **实际需求**: 短视频平台主要是 1080p
-4. **存储空间**: 节省磁盘
+1. **文件大小**: 4K 影片可能 5-10GB
+2. **處理速度**: FFmpeg 處理時間長
+3. **實際需求**: 短片平台主要是 1080p
+4. **存儲空間**: 節省磁盤
 
 ## 常用命令
 
-### 1. 查看视频信息
+### 1. 查看影片信息
 
 ```bash
-# 不下载，仅显示信息
+# 不下載，僅顯示信息
 yt-dlp --print-json URL
 
 # 查看可用格式
 yt-dlp -F URL
 ```
 
-### 2. 下载播放列表
+### 2. 下載播放列表
 
 ```bash
-# 下载整个播放列表
+# 下載整個播放列表
 yt-dlp PLAYLIST_URL
 
-# 仅下载特定视频（1-5）
+# 僅下載特定影片（1-5）
 yt-dlp --playlist-items 1-5 PLAYLIST_URL
 
-# 不下载播放列表，仅当前视频
+# 不下載播放列表，僅當前影片
 yt-dlp --no-playlist URL
 ```
 
-### 3. 代理设置
+### 3. 代理設置
 
 ```bash
 # HTTP 代理
@@ -140,39 +143,40 @@ yt-dlp --proxy socks5://proxy:port URL
 ### 4. 速率限制
 
 ```bash
-# 限制下载速度为 50KB/s
+# 限制下載速度為 50KB/s
 yt-dlp --rate-limit 50K URL
 
-# 限制为 4.2MB/s
+# 限制為 4.2MB/s
 yt-dlp --rate-limit 4.2M URL
 ```
 
-### 5. 自定义文件名
+### 5. 自定義文件名
 
 ```bash
 # 使用模板
 yt-dlp -o "%(title)s.%(ext)s" URL
 
-# 包含上传日期
+# 包含上傳日期
 yt-dlp -o "%(upload_date)s - %(title)s.%(ext)s" URL
 
-# 包含频道名称
+# 包含頻道名稱
 yt-dlp -o "%(channel)s/%(title)s.%(ext)s" URL
 ```
 
-## 字幕相关
+## 字幕相關
 
-### 字幕语言代码
+### 字幕語言代碼
 
-常用语言代码：
+常用語言代碼：
+
 - `en`: 英文
-- `zh-Hans`: 简体中文
-- `zh-Hant`: 繁体中文
-- `ja`: 日语
-- `ko`: 韩语
-- `es`: 西班牙语
-- `fr`: 法语
-- `de`: 德语
+- `zh-Hans`: 簡體中文
+- `zh-Hant`: 繁體中文
+- `ja`: 日語
+- `ko`: 韓語
+- `es`: 西班牙語
+- `fr`: 法語
+- `de`: 德語
 
 ### 查看可用字幕
 
@@ -184,13 +188,13 @@ yt-dlp --list-subs URL
 ### 字幕格式
 
 ```bash
-# VTT 格式（推荐，兼容性好）
+# VTT 格式（推薦，兼容性好）
 yt-dlp --write-sub --sub-format vtt URL
 
 # SRT 格式
 yt-dlp --write-sub --sub-format srt URL
 
-# 多种格式
+# 多種格式
 yt-dlp --write-sub --sub-format "vtt,srt" URL
 ```
 
@@ -210,7 +214,7 @@ with yt_dlp.YoutubeDL(ydl_opts) as ydl:
     ydl.download(['https://youtube.com/watch?v=VIDEO_ID'])
 ```
 
-### 获取视频信息
+### 獲取影片信息
 
 ```python
 import yt_dlp
@@ -225,7 +229,7 @@ with yt_dlp.YoutubeDL(ydl_opts) as ydl:
     print(f"Uploader: {info['uploader']}")
 ```
 
-### 进度回调
+### 進度回調
 
 ```python
 def progress_hook(d):
@@ -240,100 +244,107 @@ ydl_opts = {
 }
 ```
 
-## 常见问题
+## 常見問題
 
-### Q: 下载失败，提示 "Video unavailable"
+### Q: 下載失敗，提示 "Video unavailable"
 
 A: 可能的原因：
-- 视频已删除或私有
-- 地区限制（尝试使用代理）
-- 需要登录（使用 `--cookies` 选项）
 
-### Q: 字幕下载失败
+- 影片已刪除或私有
+- 地區限制（嘗試使用代理）
+- 需要登錄（使用 `--cookies` 選項）
 
-A: 尝试：
-1. 使用 `--write-auto-sub`（自动生成字幕）
+### Q: 字幕下載失敗
+
+A: 嘗試：
+
+1. 使用 `--write-auto-sub`（自動生成字幕）
 2. 使用 `--list-subs` 查看可用字幕
-3. 某些视频没有字幕
+3. 某些影片沒有字幕
 
-### Q: 下载速度慢
+### Q: 下載速度慢
 
-A: 解决方案：
+A: 解決方案：
+
 - 使用代理
-- 检查网络连接
-- YouTube 可能限速（等待后重试）
+- 檢查網絡連接
+- YouTube 可能限速（等待後重試）
 
 ### Q: 文件名包含非法字符
 
-A: 使用输出模板清理：
+A: 使用輸出模板清理：
+
 ```bash
 yt-dlp -o "%(title).100s.%(ext)s" URL
-# .100s 限制标题长度为 100 字符
+# .100s 限制標題長度為 100 字符
 ```
 
-### Q: 如何下载会员专属视频？
+### Q: 如何下載會員專屬影片？
 
-A: 使用浏览器 cookies：
+A: 使用瀏覽器 cookies：
+
 ```bash
-# 导出浏览器 cookies
+# 導出瀏覽器 cookies
 yt-dlp --cookies-from-browser chrome URL
 
 # 或使用 cookies 文件
 yt-dlp --cookies cookies.txt URL
 ```
 
-## 高级用法
+## 高級用法
 
-### 批量下载
+### 批量下載
 
 ```bash
-# 从文件读取 URL 列表
+# 從文件讀取 URL 列表
 yt-dlp -a urls.txt
 
-# urls.txt 内容：
+# urls.txt 內容：
 # https://youtube.com/watch?v=VIDEO1
 # https://youtube.com/watch?v=VIDEO2
 # https://youtube.com/watch?v=VIDEO3
 ```
 
-### 后处理
+### 後處理
 
 ```bash
-# 下载后转换为 MP3
+# 下載後轉換為 MP3
 yt-dlp -x --audio-format mp3 URL
 
-# 下载后嵌入字幕
+# 下載後嵌入字幕
 yt-dlp --embed-subs URL
 
-# 下载后嵌入缩略图
+# 下載後嵌入縮略圖
 yt-dlp --embed-thumbnail URL
 ```
 
-### 归档选项
+### 歸檔選項
 
 ```bash
-# 跳过已下载的视频
+# 跳過已下載的影片
 yt-dlp --download-archive archive.txt PLAYLIST_URL
 
-# archive.txt 会记录已下载的视频 ID
+# archive.txt 會記錄已下載的影片 ID
 ```
 
-## 支持的网站
+## 支持的網站
 
-yt-dlp 不仅支持 YouTube，还支持：
+yt-dlp 不僅支持 YouTube，還支持：
+
 - Vimeo
 - Twitter
 - TikTok
 - Bilibili
-- 等 1000+ 网站
+- 等 1000+ 網站
 
 查看完整列表：
+
 ```bash
 yt-dlp --list-extractors
 ```
 
-## 参考链接
+## 參考鏈接
 
 - [yt-dlp GitHub](https://github.com/yt-dlp/yt-dlp)
-- [yt-dlp 文档](https://github.com/yt-dlp/yt-dlp#readme)
-- [格式选择说明](https://github.com/yt-dlp/yt-dlp#format-selection)
+- [yt-dlp 文檔](https://github.com/yt-dlp/yt-dlp#readme)
+- [格式選擇説明](https://github.com/yt-dlp/yt-dlp#format-selection)

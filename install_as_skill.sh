@@ -1,28 +1,28 @@
 #!/bin/bash
 
 ##############################################################################
-# YouTube Clipper - Claude Code Skill 安装脚本
+# YouTube Clipper - Claude Code Skill 安裝腳本
 #
 # 功能：
-# 1. 自动创建 Skill 目录
-# 2. 复制所有必要文件
-# 3. 安装 Python 依赖
-# 4. 检测系统依赖（yt-dlp、FFmpeg）
+# 1. 自動創建 Skill 目錄
+# 2. 複製所有必要文件
+# 3. 安裝 Python 依賴
+# 4. 檢測系統依賴（yt-dlp、FFmpeg）
 #
 # 使用方法：
 #   bash install_as_skill.sh
 ##############################################################################
 
-set -e  # 遇到错误立即退出
+set -e  # 遇到錯誤立即退出
 
-# 颜色输出
+# 顏色輸出
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# 打印函数
+# 打印函數
 print_info() {
     echo -e "${BLUE}ℹ️  $1${NC}"
 }
@@ -47,44 +47,44 @@ print_header() {
     echo ""
 }
 
-# 检查命令是否存在
+# 檢查命令是否存在
 command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# 主函数
+# 主函數
 main() {
-    print_header "YouTube Clipper - Claude Code Skill 安装"
+    print_header "YouTube Clipper - Claude Code Skill 安裝"
 
-    # 1. 确定 Skill 目录
+    # 1. 確定 Skill 目錄
     SKILL_DIR="$HOME/.agents/skills/youtube-clipper"
-    print_info "目标目录: $SKILL_DIR"
+    print_info "目標目錄: $SKILL_DIR"
 
-    # 2. 检查是否已存在
+    # 2. 檢查是否已存在
     if [ -d "$SKILL_DIR" ]; then
-        print_warning "Skill 目录已存在: $SKILL_DIR"
-        read -p "是否覆盖安装？(y/N) " -n 1 -r
+        print_warning "Skill 目錄已存在: $SKILL_DIR"
+        read -p "是否覆蓋安裝？(y/N) " -n 1 -r
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            print_info "安装已取消"
+            print_info "安裝已取消"
             exit 0
         fi
         print_info "正在更新..."
         # rm -rf "$SKILL_DIR"
     fi
 
-    # 3. 创建目录
-    print_info "创建 Skill 目录..."
+    # 3. 創建目錄
+    print_info "創建 Skill 目錄..."
     mkdir -p "$SKILL_DIR"
-    print_success "目录已创建"
+    print_success "目錄已創建"
 
-    # 4. 复制文件
-    print_info "复制项目文件..."
+    # 4. 複製文件
+    print_info "複製項目文件..."
 
-    # 获取当前脚本所在目录（即项目根目录）
+    # 獲取當前腳本所在目錄（即項目根目錄）
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-    # 复制所有必要文件
+    # 複製所有必要文件
     if command_exists rsync; then
         rsync -av --exclude 'venv' \
                   --exclude '.git' \
@@ -105,107 +105,107 @@ main() {
         if [ -f "$SKILL_DIR/.env" ]; then rm "$SKILL_DIR/.env"; fi
     fi
 
-    print_success "文件复制完成"
+    print_success "文件複製完成"
 
-    # 5. 检查 Python
-    print_info "检查 Python 环境..."
+    # 5. 檢查 Python
+    print_info "檢查 Python 環境..."
     if ! command_exists python3; then
-        print_error "未找到 Python 3，请先安装 Python 3.8+"
+        print_error "未找到 Python 3，請先安裝 Python 3.8+"
         exit 1
     fi
 
     PYTHON_VERSION=$(python3 --version)
-    print_success "Python 已安装: $PYTHON_VERSION"
+    print_success "Python 已安裝: $PYTHON_VERSION"
 
-    # 6. 检查 pip
+    # 6. 檢查 pip
     if ! command_exists pip3 && ! command_exists pip; then
-        print_error "未找到 pip，请先安装 pip"
+        print_error "未找到 pip，請先安裝 pip"
         exit 1
     fi
-    print_success "pip 已安装"
+    print_success "pip 已安裝"
 
-    # 7. 创建虚拟环境并安装依赖
-    print_info "创建 Python 虚拟环境..."
+    # 7. 創建虛擬環境並安裝依賴
+    print_info "創建 Python 虛擬環境..."
     cd "$SKILL_DIR"
 
-    # 清除旧的 venv
+    # 清除舊的 venv
     if [ -d "venv" ]; then
         rm -rf venv
     fi
 
-    # 创建 venv
+    # 創建 venv
     python3 -m venv venv
 
-    print_info "激活虚拟环境并安装依赖..."
-    # 使用 venv 中的 pip 安装
+    print_info "激活虛擬環境並安裝依賴..."
+    # 使用 venv 中的 pip 安裝
     ./venv/bin/pip install -q --no-cache-dir --upgrade pip
     ./venv/bin/pip install -q --no-cache-dir yt-dlp pysrt python-dotenv
 
-    print_success "Python 依赖安装完成（已安装至 venv）"
+    print_success "Python 依賴安裝完成（已安裝至 venv）"
 
-    # 8. 检查 yt-dlp
-    print_info "检查 yt-dlp..."
+    # 8. 檢查 yt-dlp
+    print_info "檢查 yt-dlp..."
     if [ -f "./venv/bin/yt-dlp" ]; then
         YT_DLP_VERSION=$(./venv/bin/yt-dlp --version)
-        print_success "yt-dlp 已安装 (venv): $YT_DLP_VERSION"
+        print_success "yt-dlp 已安裝 (venv): $YT_DLP_VERSION"
     elif command_exists yt-dlp; then
         YT_DLP_VERSION=$(yt-dlp --version)
-        print_success "yt-dlp 已安装 (系统): $YT_DLP_VERSION"
+        print_success "yt-dlp 已安裝 (系統): $YT_DLP_VERSION"
     else
-        print_warning "yt-dlp 命令行工具未在 PATH 中找到 (但已安装在 venv 中)"
+        print_warning "yt-dlp 命令行工具未在 PATH 中找到 (但已安裝在 venv 中)"
     fi
 
-    # 9. 检查 FFmpeg（关键：需要 libass 支持）
-    print_header "检查 FFmpeg（字幕烧录需要）"
+    # 9. 檢查 FFmpeg（關鍵：需要 libass 支持）
+    print_header "檢查 FFmpeg（字幕燒錄需要）"
 
     FFMPEG_FOUND=false
     LIBASS_SUPPORTED=false
 
-    # 检查 ffmpeg-full（macOS 推荐）
+    # 檢查 ffmpeg-full（macOS 推薦）
     if [ -f "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg" ]; then
-        print_success "ffmpeg-full 已安装（Apple Silicon）"
+        print_success "ffmpeg-full 已安裝（Apple Silicon）"
         FFMPEG_FOUND=true
         LIBASS_SUPPORTED=true
     elif [ -f "/usr/local/opt/ffmpeg-full/bin/ffmpeg" ]; then
-        print_success "ffmpeg-full 已安装（Intel Mac）"
+        print_success "ffmpeg-full 已安裝（Intel Mac）"
         FFMPEG_FOUND=true
         LIBASS_SUPPORTED=true
     elif command_exists ffmpeg; then
         FFMPEG_VERSION=$(ffmpeg -version | head -n 1)
-        print_success "FFmpeg 已安装: $FFMPEG_VERSION"
+        print_success "FFmpeg 已安裝: $FFMPEG_VERSION"
         FFMPEG_FOUND=true
 
-        # 检查 libass 支持
+        # 檢查 libass 支持
         if ffmpeg -filters 2>&1 | grep -q "subtitles"; then
-            print_success "FFmpeg 支持 libass（字幕烧录可用）"
+            print_success "FFmpeg 支持 libass（字幕燒錄可用）"
             LIBASS_SUPPORTED=true
         else
-            print_warning "FFmpeg 不支持 libass（字幕烧录不可用）"
+            print_warning "FFmpeg 不支持 libass（字幕燒錄不可用）"
         fi
     fi
 
     if [ "$FFMPEG_FOUND" = false ]; then
-        print_error "FFmpeg 未安装"
-        print_info "安装方法:"
-        print_info "  macOS:  brew install ffmpeg-full  # 推荐，包含 libass"
+        print_error "FFmpeg 未安裝"
+        print_info "安裝方法:"
+        print_info "  macOS:  brew install ffmpeg-full  # 推薦，包含 libass"
         print_info "  Ubuntu: sudo apt-get install ffmpeg libass-dev"
     elif [ "$LIBASS_SUPPORTED" = false ]; then
-        print_warning "FFmpeg 缺少 libass 支持，字幕烧录功能将不可用"
-        print_info "解决方法（macOS）:"
+        print_warning "FFmpeg 缺少 libass 支持，字幕燒錄功能將不可用"
+        print_info "解決方法（macOS）:"
         print_info "  brew uninstall ffmpeg"
         print_info "  brew install ffmpeg-full"
     fi
 
-    # 10. 创建 .env 文件
-    print_header "配置环境变量"
+    # 10. 創建 .env 文件
+    print_header "配置環境變量"
 
     if [ -f "$SKILL_DIR/.env.example" ]; then
-        print_info "创建 .env 文件..."
+        print_info "創建 .env 文件..."
         cp "$SKILL_DIR/.env.example" "$SKILL_DIR/.env"
-        print_success ".env 文件已创建"
+        print_success ".env 文件已創建"
         echo ""
         print_info "配置文件位置: $SKILL_DIR/.env"
-        print_info "如需自定义配置，可编辑："
+        print_info "如需自定義配置，可編輯："
         print_info "  nano $SKILL_DIR/.env"
         print_info "  或"
         print_info "  code $SKILL_DIR/.env"
@@ -214,34 +214,34 @@ main() {
     fi
 
     # 11. 完成
-    print_header "安装完成！"
+    print_header "安裝完成！"
 
-    print_success "YouTube Clipper 已成功安装为 Claude Code Skill"
+    print_success "YouTube Clipper 已成功安裝為 Claude Code Skill"
     echo ""
-    print_info "安装位置: $SKILL_DIR"
+    print_info "安裝位置: $SKILL_DIR"
     echo ""
 
-    # 检查依赖状态
+    # 檢查依賴狀態
     if [ "$FFMPEG_FOUND" = false ] || [ "$LIBASS_SUPPORTED" = false ]; then
-        print_warning "系统依赖不完整，部分功能可能不可用"
+        print_warning "系統依賴不完整，部分功能可能不可用"
         echo ""
     fi
 
     print_info "使用方法："
-    print_info "  在 Claude Code 中输入："
-    print_info "  \"剪辑这个 YouTube 视频：https://youtube.com/watch?v=VIDEO_ID\""
+    print_info "  在 Claude Code 中輸入："
+    print_info "  \"剪輯這個 YouTube 影片：https://youtube.com/watch?v=VIDEO_ID\""
     echo ""
-    print_info "详细文档："
+    print_info "詳細文檔："
     print_info "  - Skill 使用指南: $SKILL_DIR/SKILL.md"
-    print_info "  - 项目文档: $SKILL_DIR/README.md"
-    print_info "  - 技术说明: $SKILL_DIR/TECHNICAL_NOTES.md"
+    print_info "  - 項目文檔: $SKILL_DIR/README.md"
+    print_info "  - 技術説明: $SKILL_DIR/TECHNICAL_NOTES.md"
     echo ""
     print_success "祝使用愉快！ 🎉"
     echo ""
 }
 
-# 错误处理
-trap 'print_error "安装过程中发生错误"; exit 1' ERR
+# 錯誤處理
+trap 'print_error "安裝過程中發生錯誤"; exit 1' ERR
 
-# 运行主函数
+# 運行主函數
 main

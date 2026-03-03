@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-【Shorts 专用】分析字幕并生成短视频片段
-解析 VTT 字幕文件，专为 <60s 短视频优化，
-侧重于寻找富有冲击力、金句密集的高能片段。
+【Shorts 專用】分析字幕並生成短片片段
+解析 VTT 字幕文件，專為 <60s 短片優化，
+側重於尋找富有衝擊力、金句密集的高能片段。
 """
 
 import sys
@@ -20,7 +20,7 @@ from utils import (
 
 def parse_vtt(vtt_path: str) -> List[Dict]:
     """
-    解析 VTT 字幕文件 (复用 analyze_subtitles.py 逻辑)
+    解析 VTT 字幕文件 (複用 analyze_subtitles.py 邏輯)
     """
     vtt_path = Path(vtt_path)
 
@@ -34,11 +34,11 @@ def parse_vtt(vtt_path: str) -> List[Dict]:
     with open(vtt_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # 移除 WEBVTT 头部和样式信息
+    # 移除 WEBVTT 頭部和樣式信息
     content = re.sub(r'^WEBVTT.*?\n\n', '', content, flags=re.DOTALL)
     content = re.sub(r'STYLE.*?-->', '', content, flags=re.DOTALL)
 
-    # 分割字幕块
+    # 分割字幕塊
     blocks = content.strip().split('\n\n')
 
     for block in blocks:
@@ -47,7 +47,7 @@ def parse_vtt(vtt_path: str) -> List[Dict]:
         if len(lines) < 2:
             continue
 
-        # 查找时间戳行
+        # 查找時間戳行
         timestamp_line = None
         text_lines = []
 
@@ -60,7 +60,7 @@ def parse_vtt(vtt_path: str) -> List[Dict]:
         if not timestamp_line or not text_lines:
             continue
 
-        # 解析时间戳
+        # 解析時間戳
         try:
             timestamp_line = re.sub(r'align:.*|position:.*', '', timestamp_line).strip()
 
@@ -80,18 +80,18 @@ def parse_vtt(vtt_path: str) -> List[Dict]:
         except Exception:
             continue
 
-    print(f"   找到 {len(subtitles)} 条字幕")
+    print(f"   找到 {len(subtitles)} 條字幕")
     return subtitles
 
 
 def prepare_shorts_analysis_data(subtitles: List[Dict]) -> Dict:
     """
-    准备 Shorts 专属分析数据
+    準備 Shorts 專屬分析數據
     """
     if not subtitles:
         raise ValueError("No subtitles to analyze")
 
-    print(f"\n📝 准备 Shorts 分析数据 (目标 < 60s)...")
+    print(f"\n📝 準備 Shorts 分析數據 (目標 < 60s)...")
 
     full_text_lines = []
     for sub in subtitles:
@@ -101,7 +101,7 @@ def prepare_shorts_analysis_data(subtitles: List[Dict]) -> Dict:
     full_text = '\n'.join(full_text_lines)
     total_duration = subtitles[-1]['end']
 
-    # Shorts 目标时长通常为 15-60 秒
+    # Shorts 目標時長通常為 15-60 秒
     target_duration = 60 
 
     return {
@@ -118,7 +118,7 @@ def save_analysis_data(data: Dict, output_path: str):
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
-    print(f"✅ 分析数据已保存: {output_path}")
+    print(f"✅ 分析數據已保存: {output_path}")
 
 
 def main():
@@ -137,25 +137,25 @@ def main():
 
         analysis_data = prepare_shorts_analysis_data(subtitles)
 
-        # 输出提示给 Claude
+        # 輸出提示給 Claude
         print("\n" + "="*60)
-        print("Shorts 分析模式 - 字幕文本预览:")
+        print("Shorts 分析模式 - 字幕文本預覽:")
         print("="*60)
         lines = analysis_data['subtitle_text'].split('\n')
         print('\n'.join(lines[:50]))
         if len(lines) > 50:
-            print(f"\n... (剩余 {len(lines) - 50} 行)")
+            print(f"\n... (剩餘 {len(lines) - 50} 行)")
 
         if output_json:
             save_analysis_data(analysis_data, output_json)
 
         print("\n" + "="*60)
-        print("💡 Claude 提示: 请寻找 15-60秒 的高能片段")
-        print("   要求: 开头 3 秒必须有钩子，结尾有反转或金句，适合竖屏传播。")
+        print("💡 Claude 提示: 請尋找 15-60秒 的高能片段")
+        print("   要求: 開頭 3 秒必須有鈎子，結尾有反轉或金句，適合豎屏傳播。")
         print("="*60)
 
     except Exception as e:
-        print(f"\n❌ 错误: {str(e)}")
+        print(f"\n❌ 錯誤: {str(e)}")
         sys.exit(1)
 
 
