@@ -57,7 +57,7 @@ main() {
     print_header "YouTube Clipper - Claude Code Skill 安装"
 
     # 1. 确定 Skill 目录
-    SKILL_DIR="$HOME/.claude/skills/youtube-clipper"
+    SKILL_DIR="$HOME/.agents/skills/youtube-clipper"
     print_info "目标目录: $SKILL_DIR"
 
     # 2. 检查是否已存在
